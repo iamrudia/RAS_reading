@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>선생님용 – 40일 독서기록장</title>
+<style>
+:root{--paper:#f4f1ea;--card:#fffefb;--ink:#1d2321;--muted:#626b67;--line:#dcd7cb;--teal:#1f6f68;--teal-l:#dcefeb;--navy:#2c4a7a;--navy-l:#e1e8f4;--red:#b23a32;--gold-l:#f6ecd4;
+  --serif:'Noto Serif KR','Noto Serif CJK KR','Nanum Myeongjo','Batang',serif;--sans:'Pretendard','Noto Sans KR','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;font-size:16px;word-break:keep-all;overflow-wrap:anywhere}
+a{color:var(--navy)}
+header{background:var(--ink);color:#fff}
+header .in{max-width:1000px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header b{font-family:var(--serif);font-size:19px}
+header nav{margin-left:auto;display:flex;gap:14px;font-size:14px}
+header nav a{color:#fff}
+main{max-width:1000px;margin:0 auto;padding:20px 16px 60px}
+h1,h2,h3{font-family:var(--serif);line-height:1.35}
+h1{font-size:26px;margin:4px 0}
+h2{font-size:20px;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+label.f{display:block;font-weight:500;font-size:14px;margin:12px 0 4px}
+input[type=text],input[type=url],input[type=date],input[type=number],textarea{width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink)}
+.hint{font-size:13px;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:500;cursor:pointer;background:var(--ink);color:#fff;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)} .btn.teal{background:var(--teal)} .btn.sm{padding:6px 11px;font-size:14px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.radios label{display:block;margin:6px 0}
+.acts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 14px;font-size:14px}
+@media (max-width:760px){.acts{grid-template-columns:1fr}}
+.acts .h{grid-column:1/-1;font-weight:700;margin-top:8px}
+.acts.off{opacity:.45;pointer-events:none}
+.note{background:var(--gold-l);border:1px solid #ecd9a8;border-radius:12px;padding:12px 14px;font-size:14px}
+.out{display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:start}
+@media (max-width:760px){.out{grid-template-columns:1fr}}
+#qr{background:#fff;padding:12px;border-radius:12px;border:1px solid var(--line);width:240px;min-height:240px;display:flex;align-items:center;justify-content:center}
+#qr img,#qr canvas{width:216px!important;height:216px!important}
+#link{font-family:ui-monospace,Consolas,monospace;font-size:12px;min-height:90px;resize:vertical}
+.code{display:inline-block;font-family:ui-monospace,Consolas,monospace;background:var(--teal-l);color:var(--teal);padding:2px 8px;border-radius:6px;font-weight:700}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th,table.t td{border:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:middle}
+table.t th{background:#ece7da;font-weight:500}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:99}
+.toast.on{opacity:1}
+#printCard{display:none}
+@media print{
+  body{background:#fff} header,main,.toast{display:none!important}
+  #printCard{display:block;text-align:center;padding:30px;font-family:var(--sans)}
+  #printCard h1{font-size:34px} #printCard .q img,#printCard .q canvas{width:340px!important;height:340px!important}
+  #printCard ol{text-align:left;display:inline-block;font-size:18px;line-height:1.9}
+}
+</style>
+</head>
+<body>
+<header><div class="in"><b>📚 40일 독서기록장 · 선생님용</b>
+  <nav><a href="guide.html" target="_blank">사용 안내</a><a href="collect.html" target="_blank">제출 파일 모아보기</a></nav></div></header>
+<main>
+  <h1>우리 반 링크 만들기</h1>
+  <p class="lead">설정을 입력하고 ‘링크 만들기’를 누르면 우리 반 전용 링크와 QR코드가 만들어져요. <b>설정은 링크 안에 들어가고, 어디에도 저장되지 않아요.</b> 회원가입도 필요 없어요.</p>
+
+  <div class="card">
+    <h2>불러오기 <span class="hint" style="font-weight:400">(이미 만든 링크를 고칠 때)</span></h2>
+    <div style="display:flex;gap:8px"><input type="url" id="pasteLink" placeholder="전에 만든 우리 반 링크를 붙여 넣으세요"><button class="btn ghost" id="loadLink" style="white-space:nowrap">불러오기</button></div>
+    <div id="recent" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <h2>1. 학급 정보 <span class="hint" style="font-weight:400">학급 코드 <span class="code" id="cid"></span></span></h2>
+    <div class="grid3">
+      <div><label class="f">학교 이름</label><input type="text" id="school" placeholder="예: ○○중학교"></div>
+      <div><label class="f">학급·교과 표시</label><input type="text" id="cls" placeholder="예: 2학년 국어 / 1학년 3반"></div>
+      <div><label class="f">프로젝트 이름</label><input type="text" id="title" placeholder="40일 독서기록장"></div>
+    </div>
+    <div class="grid3">
+      <div><label class="f">시작일</label><input type="date" id="start"><span class="hint">비우면 학생마다 첫 기록일부터 셉니다.</span></div>
+      <div><label class="f">기간 (일)</label><input type="number" id="days" min="7" max="120" value="40"></div>
+      <div><label class="f">중간 점검일 (며칠째, 쉼표로)</label><input type="text" id="checks" placeholder="예: 10, 20, 30"><span class="hint">그날 학생 화면에 ‘제출하세요’ 알림이 떠요.</span></div>
+    </div>
+    <label class="f">전자도서관 링크</label><input type="url" id="elib">
+    <span class="hint">기본값: 경기도교육청 전자도서관. 학교 도서관 전자책 서비스를 쓰면 그 주소로 바꾸세요.</span>
+  </div>
+
+  <div class="card">
+    <h2>2. 제출 링크</h2>
+    <label class="f">제출 폴더 링크 (OneDrive 또는 Google Drive)</label>
+    <input type="url" id="upload" placeholder="https://…">
+    <div class="hint" style="margin-top:6px">
+      <b>OneDrive (추천)</b> — OneDrive에서 폴더 선택 → ‘…’ → <b>파일 요청</b> → 링크 복사. 학생은 로그인 없이 올리고, 서로의 파일은 보지 못해요.<br>
+      <b>Google Drive</b> — <b>Google 설문지</b>에 ‘파일 업로드’ 질문을 만들고 설문 링크를 넣으세요(학생 구글 로그인 필요, 파일은 선생님 드라이브에 모임). 공유 폴더 링크도 되지만 학생에게 편집 권한이 필요하고 서로의 파일이 보여요.
+    </div>
+    <label class="f">제출 버튼 이름</label><input type="text" id="uploadLabel" placeholder="제출 폴더">
+  </div>
+
+  <div class="card">
+    <h2>3. 독후활동 방식</h2>
+    <div class="radios">
+      <label><input type="radio" name="mode" value="free" checked> <b>학생 자유 선택</b> — 19가지 활동 중에서 학생이 골라요</label>
+      <label><input type="radio" name="mode" value="pick"> <b>정해 준 목록 중 선택</b> — 아래에서 체크한 활동 중에서 학생이 골라요</label>
+      <label><input type="radio" name="mode" value="fixed"> <b>교사 지정</b> — 아래에서 체크한 활동을 모두 해야 해요</label>
+    </div>
+    <div id="countWrap"><label class="f">학생이 해야 할 활동 수</label><input type="number" id="count" min="1" max="10" value="1" style="max-width:120px"></div>
+    <label class="f">활동 목록</label>
+    <div class="acts" id="acts"></div>
+    <p class="hint">소설 전용·비문학 전용 활동은 학생이 고른 책의 갈래에 맞을 때만 보여요.</p>
+  </div>
+
+  <div class="btns" style="margin:0 0 18px"><button class="btn teal" id="make" style="font-size:17px;padding:12px 22px">🔗 우리 반 링크 만들기</button><button class="btn ghost" id="newClass">＋ 새 학급으로 시작</button></div>
+
+  <div class="card" id="outCard" style="display:none;border:2px solid var(--teal)">
+    <h2>우리 반 링크가 만들어졌어요</h2>
+    <div class="out">
+      <div><div id="qr"></div><div class="btns"><button class="btn sm ghost" id="dlQr">QR 그림 저장</button><button class="btn sm ghost" id="printQr">🖨 안내문 인쇄</button></div></div>
+      <div>
+        <label class="f" style="margin-top:0">학생에게 나눠 줄 링크</label>
+        <textarea id="link" readonly></textarea>
+        <div class="btns"><button class="btn" id="copy">📋 링크 복사</button><a class="btn ghost" id="open" target="_blank" rel="noopener">학생 화면 미리 보기 ↗</a></div>
+        <div class="note" style="margin-top:14px">
+          · 링크가 길어요. 학급 게시판·클래스룸에 붙여 넣거나 QR코드를 띄워 주세요. 짧은 주소가 필요하면 단축 URL 서비스를 쓰세요.<br>
+          · <b>이 링크를 꼭 보관하세요.</b> 나중에 설정을 고칠 때 위 ‘불러오기’에 붙여 넣으면 됩니다. (이 브라우저에는 최근 링크가 자동으로 남아요)<br>
+          · 설정을 고쳐 새 링크를 만들어도 <b>학급 코드가 같으면 학생 기록은 그대로 이어져요.</b> 학생에게 새 링크를 다시 안내해 주세요.
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="printCard">
+  <h1 id="pcTitle"></h1>
+  <p id="pcSub" style="font-size:20px"></p>
+  <div class="q" id="pcQr" style="display:inline-block;margin:16px 0"></div><br>
+  <ol>
+    <li>휴대폰·태블릿 카메라로 QR코드를 찍어요.</li>
+    <li>열린 화면을 <b>즐겨찾기(북마크)</b>하거나 홈 화면에 추가해요.</li>
+    <li>40일 동안 <b>같은 기기, 같은 브라우저</b>로 들어와 기록해요.</li>
+    <li>가끔 ⑤에서 <b>기록 파일 저장</b>을 눌러 백업해요.</li>
+  </ol>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="core.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+'use strict';
+var R=R40,TKEY='r40teacher',ID=R.uid(6),LINK='';
+function $(s){return document.querySelector(s)} function $$(s){return [].slice.call(document.querySelectorAll(s))}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on')},2200)}
+function base(){return new URL('index.html',location.href).href.split('#')[0]}
+
+function renderActs(sel){$('#acts').innerHTML=['write','think','show'].map(function(c){return '<div class="h">'+R.CATS[c]+'</div>'+R.ACTS.filter(function(a){return a.cat===c}).map(function(a){return '<label><input type="checkbox" value="'+a.id+'"'+(sel.indexOf(a.id)>=0?' checked':'')+'> '+a.ic+' '+R.esc(a.name)+(R.GN[a.g]?' <span class="hint">('+R.GN[a.g]+')</span>':'')+'</label>'}).join('')}).join('')}
+function syncMode(){var m=mode();$('#acts').classList.toggle('off',m==='free');$('#countWrap').style.display=m==='fixed'?'none':''}
+function mode(){var r=$$('input[name=mode]').filter(function(x){return x.checked})[0];return r?r.value:'free'}
+
+function fill(c){c=R.full(c);ID=c.id||R.uid(6);$('#cid').textContent=ID;
+  $('#school').value=c.school||'';$('#cls').value=c.cls||'';$('#title').value=c.title===R.DEF.title?'':c.title;$('#start').value=c.start||'';$('#days').value=c.days||40;
+  $('#checks').value=(c.checks||[]).join(', ');$('#elib').value=c.elib||R.DEF.elib;$('#upload').value=c.upload||'';$('#uploadLabel').value=c.uploadLabel===R.DEF.uploadLabel?'':c.uploadLabel;
+  $$('input[name=mode]').forEach(function(r){r.checked=r.value===(c.mode||'free')});$('#count').value=c.count||1;renderActs(c.acts||[]);syncMode()}
+function read(){var c={v:1,id:ID,school:$('#school').value.trim(),cls:$('#cls').value.trim(),title:$('#title').value.trim()||R.DEF.title,start:$('#start').value,
+   days:Math.max(7,Math.min(120,+$('#days').value||40)),checks:$('#checks').value.split(/[,\s]+/).map(Number).filter(function(n){return n>0}),
+   elib:$('#elib').value.trim()||R.DEF.elib,upload:$('#upload').value.trim(),uploadLabel:$('#uploadLabel').value.trim()||R.DEF.uploadLabel,
+   mode:mode(),acts:$$('#acts input:checked').map(function(x){return x.value}),count:Math.max(1,+$('#count').value||1)};
+  return c}
+/* 기본값과 같은 항목은 빼서 링크를 짧게 */
+function compact(c){var o={};for(var k in c){var v=c[k],d=R.DEF[k];if(k==='v'||k==='id'||JSON.stringify(v)!==JSON.stringify(d))o[k]=v}return o}
+
+function make(){var c=read();
+  if(c.mode!=='free'&&!c.acts.length){toast('목록 선택·교사 지정은 활동을 하나 이상 체크해 주세요');return}
+  if(c.mode==='pick'&&c.count>c.acts.length){toast('해야 할 활동 수가 목록보다 많아요');return}
+  if(c.upload&&!/^https?:\/\//.test(c.upload)){toast('제출 링크는 https:// 로 시작해야 해요');return}
+  LINK=base()+'#c='+R.encodeCfg(compact(c));
+  $('#link').value=LINK;$('#open').href=LINK;$('#outCard').style.display='';
+  drawQr('#qr',LINK);remember(c);
+  $('#pcTitle').textContent=c.title;$('#pcSub').textContent=[c.school,c.cls].filter(Boolean).join(' · ');
+  $('#outCard').scrollIntoView({behavior:'smooth'})}
+function drawQr(sel,text){var el=$(sel);el.innerHTML='';
+  if(!window.QRCode){el.innerHTML='<span class="hint">QR코드를 그리지 못했어요 (인터넷 연결 확인). 링크는 그대로 쓸 수 있어요.</span>';return}
+  try{new QRCode(el,{text:text,width:512,height:512,correctLevel:QRCode.CorrectLevel.L})}catch(e){el.innerHTML='<span class="hint">링크가 너무 길어 QR코드를 만들 수 없어요. 단축 URL을 쓰세요.</span>'}}
+
+/* 최근 링크 (이 브라우저에만) */
+function recent(){try{return JSON.parse(localStorage.getItem(TKEY))||[]}catch(e){return []}}
+function remember(c){var l=recent().filter(function(x){return x.id!==c.id});l.unshift({id:c.id,name:[c.school,c.cls,c.title].filter(Boolean).join(' · '),link:LINK,at:new Date().toLocaleString('ko-KR')});
+  try{localStorage.setItem(TKEY,JSON.stringify(l.slice(0,20)))}catch(e){}renderRecent()}
+function renderRecent(){var l=recent();$('#recent').innerHTML=l.length?'<table class="t"><tr><th>최근 만든 학급 (이 브라우저)</th><th style="width:90px">코드</th><th style="width:170px">만든 때</th><th style="width:150px"></th></tr>'+l.map(function(x,i){return '<tr><td>'+R.esc(x.name)+'</td><td><span class="code">'+R.esc(x.id)+'</span></td><td class="hint">'+R.esc(x.at)+'</td><td><button class="btn sm ghost" data-load="'+i+'">불러오기</button> <button class="btn sm ghost" data-rm="'+i+'">×</button></td></tr>'}).join('')+'</table>':''}
+function loadFrom(url){var d=R.cfgFromUrl(url);if(!d||!d.cfg.id){toast('독서기록장 링크가 아니에요');return false}fill(d.cfg);toast('설정을 불러왔어요. 고친 뒤 ‘링크 만들기’를 누르세요');return true}
+
+document.addEventListener('DOMContentLoaded',function(){
+  fill(null);renderRecent();
+  $$('input[name=mode]').forEach(function(r){r.addEventListener('change',syncMode)});
+  $('#make').addEventListener('click',make);
+  $('#newClass').addEventListener('click',function(){if(confirm('새 학급 코드로 처음부터 시작할까요? (새 링크의 학생 기록은 기존 링크와 따로 저장돼요)')){fill(null);$('#outCard').style.display='none'}});
+  $('#loadLink').addEventListener('click',function(){loadFrom($('#pasteLink').value)});
+  $('#recent').addEventListener('click',function(e){var b=e.target.closest('[data-load]'),r=e.target.closest('[data-rm]'),l=recent();
+    if(b)loadFrom(l[+b.dataset.load].link);
+    if(r&&confirm('목록에서 지울까요? (링크 자체는 계속 쓸 수 있어요)')){l.splice(+r.dataset.rm,1);try{localStorage.setItem(TKEY,JSON.stringify(l))}catch(x){}renderRecent()}});
+  $('#copy').addEventListener('click',function(){var t=$('#link');(navigator.clipboard?navigator.clipboard.writeText(LINK):Promise.reject()).then(function(){toast('링크를 복사했어요')},function(){t.select();try{document.execCommand('copy');toast('링크를 복사했어요')}catch(e){}})});
+  $('#dlQr').addEventListener('click',function(){var c=$('#qr canvas'),i=$('#qr img');var src=c?c.toDataURL('image/png'):(i&&i.src);if(!src)return;var a=document.createElement('a');a.href=src;a.download='독서기록장_QR_'+ID+'.png';a.click()});
+  $('#printQr').addEventListener('click',function(){drawQr('#pcQr',LINK);setTimeout(function(){window.print()},300)});
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+/* 40일 독서기록장 – 공통 데이터와 계산 (학생 페이지·교사 페이지·모아보기가 함께 씀)
+   서버·데이터베이스 없음. 학급 설정은 링크(#c=…) 안에, 학생 기록은 학생 브라우저에만 저장된다. */
+(function(g){
+'use strict';
+var R={VERSION:'1.0'};
+
+/* 학급 설정 기본값 */
+R.DEF={v:1,id:'',school:'',cls:'',title:'40일 독서기록장',days:40,start:'',checks:[10,20,30],
+  elib:'https://lib.goe.go.kr/elib/index.do',upload:'',uploadLabel:'제출 폴더',mode:'free',acts:[],count:1};
+R.full=function(c){var o={};for(var k in R.DEF)o[k]=R.DEF[k];if(c)for(var j in c)if(c[j]!=null)o[j]=c[j];return o};
+
+/* ───────── 독후활동 ─────────
+   f: [키, 종류, 이름, 안내, 수/보기, 열]  종류: text | area | img | qa | rows | chips | panels */
+R.CATS={write:'✍ 쓰기 활동',think:'🧠 생각 정리 활동',show:'🎨 표현 활동'};
+R.GN={both:'',fic:'소설',non:'비문학'};
+R.ACTS=[
+ {id:'friend',cat:'write',g:'both',ic:'💌',name:'친구에게 책 소개하기',desc:'읽지 않은 친구에게 말하듯 소개',f:[['to','text','누구에게?'],['body','area','소개하는 글','줄거리(핵심 내용), 느낌, 인상 깊은 부분을 모아 친구에게 말하듯 자연스럽게 써요.',10]]},
+ {id:'recommend',cat:'write',g:'both',ic:'👍',name:'추천서 쓰기',desc:'이 책의 좋은 점을 알리기',f:[['why','area','이 책을 추천하는 이유'],['quote','area','가장 인상 깊은 구절'],['gain','area','이 책을 통해 얻을 수 있는 점'],['one','text','친구에게 추천의 한마디!']]},
+ {id:'letterChar',cat:'write',g:'fic',ic:'✉️',name:'인물에게 편지 쓰기',desc:'가장 기억에 남는 인물에게',f:[['to','text','작품 속 누구에게?'],['body','area','편지','그 인물에게 하고 싶은 말, 묻고 싶은 것, 응원이나 충고를 써요.',10]]},
+ {id:'letterAuthor',cat:'write',g:'both',ic:'📮',name:'작가에게 엽서 쓰기',desc:'느낀 점·궁금한 점을 작가에게',f:[['to','text','받는 사람 (작가 또는 출판사)'],['body','area','엽서 내용','느낀 점, 궁금한 점, 아쉬운 점 등 자유롭게 써요.',7]]},
+ {id:'sequel',cat:'write',g:'fic',ic:'📖',name:'뒷이야기 쓰기',desc:'결말 이후를 상상해 이어 쓰기',f:[['from','text','어느 장면부터 이어 쓰나요?'],['body','area','이어 쓴 이야기','결말을 바꾸거나 정반대로 써도 좋아요. 인물의 성격은 원작과 어울리게!',14]]},
+ {id:'review',cat:'write',g:'both',ic:'📰',name:'서평 쓰기',desc:'신문의 새 책 소개란처럼',f:[['head','text','서평 제목 (눈길을 끄는 한 줄)'],['body','area','서평','이 책을 읽지 않은 독자에게 책의 내용과 가치, 나의 평가를 소개해요.',12]]},
+ {id:'essay',cat:'write',g:'both',ic:'📝',name:'독서감상문',desc:'자유 양식 감상문',f:[['head','text','제목'],['body','area','감상문','처음(책을 읽게 된 계기) – 가운데(내용과 생각) – 끝(배운 점, 다짐)의 짜임으로 써 보세요.',16]]},
+ {id:'character',cat:'think',g:'fic',ic:'🔍',name:'인물 탐구하기',desc:'한 인물을 깊이 들여다보기',f:[['who','text','탐구할 인물'],['why','area','이 인물을 고른 이유'],['clue','area','성격을 알 수 있는 장면이나 대사'],['trait','area','인물의 성격과 특징'],['look','area','인물의 모습 (겉모습, 말투, 행동)'],['eval','area','인물에 대한 나의 평가'],['sum','area','종합하기']]},
+ {id:'flower',cat:'think',g:'fic',ic:'🌸',name:'인물꽃 만들기',desc:'인물들의 성격을 한눈에',f:[['p','rows','등장인물 분석','인물마다 성격을 나타내는 말과 그 근거가 된 장면을 써요.',5,['인물','성격을 나타내는 말','근거가 된 장면']]]},
+ {id:'mindmap',cat:'think',g:'both',ic:'🕸',name:'마인드맵',desc:'인물·주제 중심으로 생각 잇기',mm:true,f:[['center','text','가운데 낱말 (책 제목, 주인공, 주제 등)'],['b','rows','가지','가지마다 이어지는 생각을 쉼표(,)로 나누어 써요. 아래에 그림으로 그려져요.',5,['가지 이름','이어지는 생각 (쉼표로)']]]},
+ {id:'qna',cat:'think',g:'both',ic:'💬',name:'질문과 대답 만들기',desc:'알게 된 내용으로 묻고 답하기',f:[['q','qa','질문과 대답 5개','책에서 알게 된 내용을 중심으로 질문하고 직접 답해요.',5]]},
+ {id:'research',cat:'think',g:'both',ic:'🗂',name:'자료 찾아 정리하기',desc:'책에서 더 나아가 조사하기',f:[['new','area','새롭게 알게 된 사실'],['think','area','그 사실에 대한 나의 생각'],['more','area','더 알고 싶은 내용'],['why','area','알고 싶은 이유'],['found','area','새롭게 찾은 자료'],['src','text','자료의 출처 (책 이름, 누리집 주소 등)']]},
+ {id:'apply',cat:'think',g:'non',ic:'🌱',name:'내 삶에 적용하기',desc:'책의 생각을 실천으로',f:[['claim','area','글쓴이가 가장 말하고 싶은 것'],['agree','area','내가 공감한 점 / 다르게 생각하는 점'],['plan','rows','실천 계획','책을 읽고 내 생활에서 해 볼 일을 정해요.',3,['실천할 일','언제·얼마나']],['after','area','해 보고 난 뒤 (선택)']]},
+ {id:'debate',cat:'think',g:'both',ic:'⚖',name:'토론 준비하기',desc:'쟁점을 정해 내 입장 세우기',f:[['issue','text','토론 주제 (찬반이 나뉘는 질문)'],['side','text','나의 입장'],['r1','area','근거 1 (책 속 근거 포함)'],['r2','area','근거 2'],['counter','area','예상되는 반론과 나의 답변']]},
+ {id:'comic',cat:'show',g:'both',ic:'🗯',name:'4컷 만화',desc:'인상 깊은 장면을 만화로',f:[['scene','area','가장 인상 깊은 장면과 그 이유'],['pan','panels','4컷 만화','종이에 그려 사진을 찍어 올리거나, 그림 앱으로 그려 올려요. 칸마다 장면 설명을 써요.',4]]},
+ {id:'drawing',cat:'show',g:'both',ic:'🖼',name:'그림으로 표현하기',desc:'책의 느낌을 한 장의 그림으로',f:[['img','img','나의 그림'],['title','text','그림 제목'],['desc','area','그림 설명 (무엇을, 왜 이렇게 표현했나)']]},
+ {id:'ad',cat:'show',g:'both',ic:'📣',name:'책 광고 만들기',desc:'이 책을 알리는 광고',f:[['target','text','누구에게 광고하나요? (대상 독자)'],['info','text','광고에 넣을 정보 (책 이름, 지은이, 출판사, 펴낸 해)'],['quote','area','마음에 드는 서평이나 작가의 말'],['copy','text','광고 문구 (카피)'],['img','img','광고 그림 (선택)'],['body','area','광고 글']]},
+ {id:'quiz',cat:'show',g:'both',ic:'🧩',name:'퀴즈 만들기',desc:'친구들이 풀 수 있는 퀴즈',f:[['kind','chips','퀴즈 종류 (여러 개 골라도 돼요)','',['O·X 퀴즈','선택형','단답형','스무고개','십자말풀이','빈칸 채우기']],['q','qa','문제와 정답','',5]]},
+ {id:'interview',cat:'show',g:'both',ic:'🎤',name:'가상 인터뷰',desc:'인물이나 작가를 인터뷰하기',f:[['who','text','인터뷰 대상 (작품 속 인물 또는 작가)'],['q','qa','인터뷰 질문과 대답','작품의 주제와 어울리는 질문 5개와, 그 사람이 했을 법한 대답을 써요.',5]]}
+];
+R.actById=function(id){for(var i=0;i<R.ACTS.length;i++)if(R.ACTS[i].id===id)return R.ACTS[i]};
+R.WHY=['제목이 끌려서','표지가 마음에 들어서','친구·가족·선생님 추천','관심 있는 분야라서','진로와 관련 있어서','좋아하는 작가라서','영화·드라마로 알고 있어서','책 소개를 읽고'];
+R.GH={
+ summary:['처음–가운데–끝으로 나누어 중요한 사건을 3~5문장으로 써요.','인물, 사건, 갈등(문제)이 드러나게 5문장 안팎으로 써요.','갈등이 어떻게 생기고 풀리는지, 그 과정에서 드러나는 주제가 보이게 정리해요.'],
+ key:['새롭게 알게 된 것 세 가지를 써요.','글쓴이의 주장과 그것을 뒷받침하는 근거를 나누어 써요.','글쓴이의 주장과 근거를 쓰고, 근거가 믿을 만한지도 짧게 덧붙여요.'],
+ feel:['가장 기억에 남는 장면과 그때 든 마음을 솔직하게 써요.','내 생각과 그렇게 생각한 근거(책 속 장면이나 문장)를 함께 써요.','작가가 전하려는 생각에 대한 나의 평가와 근거, 그리고 내 삶과의 연결을 써요.'],
+ best:['이 부분을 읽을 때 어떤 장면이 떠오르거나 어떤 기분이 들었나요?','이 부분이 책 전체에서 왜 중요한지, 나에게 왜 와닿았는지 써요.','이 부분이 책의 주제와 어떻게 이어지는지, 나의 생각을 어떻게 바꾸었는지 써요.']
+};
+R.RUB=[
+ ['꾸준히 읽기','계획을 세워 40일 동안 꾸준히 읽고 일지를 자주 기록했다','대체로 계획대로 읽고 일지를 기록했다','몰아서 읽거나 기록이 적었다'],
+ ['내용 이해','줄거리(핵심 내용)를 정확하고 짜임새 있게 정리했다','줄거리(핵심 내용)를 대체로 정리했다','내용 정리가 부족했다'],
+ ['생각과 근거','내 생각을 책 속 근거와 함께 분명하게 썼다','내 생각을 썼으나 근거가 부족했다','느낌을 짧게만 썼다'],
+ ['표현과 나눔','독후활동을 개성 있게 완성하고, 함께 나눌 좋은 질문을 만들었다','독후활동을 완성하고 질문을 만들었다','독후활동이나 질문이 미완성이다']
+];
+
+/* ───────── 도움 함수 ───────── */
+function filled(v){return v!=null&&String(v).trim()!==''}
+R.filled=filled;
+R.esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+function pad(n){return ('0'+n).slice(-2)}
+R.iso=function(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+R.pd=function(s){var a=String(s).split('-');return new Date(+a[0],+a[1]-1,+a[2])};
+R.addD=function(s,n){var d=R.pd(s);d.setDate(d.getDate()+n);return R.iso(d)};
+R.diff=function(a,b){return Math.round((R.pd(b)-R.pd(a))/86400000)};
+R.md=function(s){var d=R.pd(s);return (d.getMonth()+1)+'/'+d.getDate()};
+R.today=function(){return R.iso(new Date())};
+R.uid=function(n){var c='abcdefghijkmnpqrstuvwxyz23456789',s='';for(var i=0;i<(n||6);i++)s+=c[Math.floor(Math.random()*c.length)];return s};
+
+/* ───────── 설정 ↔ 링크 ───────── */
+R.b64e=function(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+R.b64d=function(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)))};
+R.hash=function(str){var h=5381;str='r40|'+str;for(var i=0;i<str.length;i++)h=((h<<5)+h+str.charCodeAt(i))|0;return (h>>>0).toString(36)};
+R.encodeCfg=function(c){var j=JSON.stringify(c);return R.b64e(j)+'.'+R.hash(j)};
+R.decodeCfg=function(s){try{var p=String(s).split('.'),j=R.b64d(p[0]),c=JSON.parse(j);if(!c||typeof c!=='object')return null;return {cfg:c,ok:p[1]===R.hash(j)}}catch(e){return null}};
+R.cfgFromUrl=function(u){var m=/[#&?]c=([A-Za-z0-9_\-.]+)/.exec(u||'');return m?R.decodeCfg(m[1]):null};
+
+/* ───────── 진행 상태 (S = 학생 기록, c = 학급 설정) ───────── */
+function g_(S,p){return p.split('.').reduce(function(o,k){return o==null?undefined:o[k]},S)}
+function arr(S,p){var a=g_(S,p);return Array.isArray(a)?a:[]}
+R.get=g_;R.arr=arr;
+R.genre=function(S){return g_(S,'book.genre')||''};
+R.startDate=function(S,c){var s=g_(S,'book.start');if(s)return s;if(c.start)return c.start;var l=arr(S,'logs').map(function(x){return x.date}).sort();return l[0]||R.today()};
+R.days=function(c){return Math.max(1,+c.days||40)};
+R.mode=function(c){var m=c.mode||'free';if(m!=='free'&&!(c.acts||[]).length)m='free';return m};
+R.fitGenre=function(a,S){var g=R.genre(S);return !g||a.g==='both'||a.g===g};
+R.actAvail=function(S,c){var m=R.mode(c);return R.ACTS.filter(function(a){return R.fitGenre(a,S)&&(m==='free'||c.acts.indexOf(a.id)>=0)})};
+R.actChosen=function(S,c){var av=R.actAvail(S,c);if(R.mode(c)==='fixed')return av;var ch=arr(S,'act.chosen');return av.filter(function(a){return ch.indexOf(a.id)>=0})};
+R.actNeed=function(S,c){var n=R.actAvail(S,c).length;return R.mode(c)==='fixed'?n:Math.min(Math.max(1,+c.count||1),n)};
+R.fkeys=function(f){var k=f[0],t=f[1],n=f[4],o=[],i;
+  if(t==='qa'){for(i=1;i<=n;i++)o.push(k+i+'q',k+i+'a');return o}
+  if(t==='rows'){for(i=1;i<=n;i++)o.push(k+i+'_0');return o}
+  if(t==='panels'){for(i=1;i<=n;i++)o.push(k+i+'img');return o}
+  return [k]};
+R.aval=function(S,a,k){var d=g_(S,'act.data.'+a.id);return d?d[k]:undefined};
+R.actState=function(S,a){var ks=[];a.f.forEach(function(f){ks=ks.concat(R.fkeys(f))});
+  var n=ks.filter(function(k){var v=R.aval(S,a,k);return Array.isArray(v)?v.length:filled(v)}).length;
+  return n===0?0:n>=Math.ceil(ks.length*0.6)?2:1};
+R.postKeys=function(S){return (R.genre(S)==='non'?['post.theme','post.key1','post.key2','post.key3']:['post.summary']).concat(['post.feel','post.best','post.bestWhy','post.share'])};
+R.st={
+ pre:function(S){var n=['pre.why','pre.predict','pre.wonder','pre.daily'].filter(function(k){return filled(g_(S,k))}).length+(arr(S,'pre.chips').length?1:0);return n>=4?2:n?1:0},
+ during:function(S){var n=arr(S,'logs').length;return n>=10?2:n?1:0},
+ post:function(S){var ks=R.postKeys(S),n=ks.filter(function(k){return filled(g_(S,k))}).length;return n===ks.length?2:n?1:0},
+ act:function(S,c){var ch=R.actChosen(S,c);if(!ch.length)return 0;var d=ch.filter(function(a){return R.actState(S,a)===2}).length;return d>=R.actNeed(S,c)?2:1},
+ fin:function(S){var star=g_(S,'fin.star'),one=filled(g_(S,'fin.oneline')),self=g_(S,'self')||{};return star&&one&&Object.keys(self).length===R.RUB.length?2:(star||one)?1:0}
+};
+R.summary=function(S,c){var logs=arr(S,'logs'),s=R.startDate(S,c),D=R.days(c),dates={};
+  logs.forEach(function(l){var k=R.diff(s,l.date);if(k>=0&&k<D)dates[l.date]=1});
+  var pct=Math.min(100,Math.max.apply(null,[0].concat(logs.map(function(l){return +l.pct||0}))));
+  var ch=R.actChosen(S,c);
+  return {start:s,logs:logs.length,logDays:Object.keys(dates).length,pct:pct,quotes:arr(S,'quotes').length,qs:arr(S,'qs').length,
+    actDone:ch.filter(function(a){return R.actState(S,a)===2}).length,actNeed:R.actNeed(S,c),actNames:ch.map(function(a){return a.name}),
+    pre:R.st.pre(S,c),during:R.st.during(S,c),post:R.st.post(S,c),act:R.st.act(S,c),fin:R.st.fin(S,c),star:+(g_(S,'fin.star')||0)}};
+
+g.R40=R;
+})(window);

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사용 안내 – 40일 독서기록장</title>
+<style>
+:root{--paper:#f4f1ea;--card:#fffefb;--ink:#1d2321;--muted:#626b67;--line:#dcd7cb;--teal:#1f6f68;--teal-l:#dcefeb;--navy:#2c4a7a;--gold-l:#f6ecd4;
+  --serif:'Noto Serif KR','Noto Serif CJK KR','Nanum Myeongjo','Batang',serif;--sans:'Pretendard','Noto Sans KR','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.75;font-size:16px;word-break:keep-all;overflow-wrap:anywhere}
+a{color:var(--navy)}
+header{background:var(--ink);color:#fff}
+header .in{max-width:860px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header b{font-family:var(--serif);font-size:19px}
+header nav{margin-left:auto;display:flex;gap:14px;font-size:14px} header nav a{color:#fff}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1,h2,h3{font-family:var(--serif);line-height:1.35}
+h1{font-size:28px;margin:6px 0}
+h2{font-size:21px;margin:30px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--ink)}
+h3{font-size:17px;margin:18px 0 4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px;margin:12px 0}
+.toc{display:flex;gap:8px;flex-wrap:wrap}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:14px;text-decoration:none;color:var(--ink)}
+ol li,ul li{margin:4px 0}
+.ok{background:var(--teal-l);border-radius:12px;padding:12px 16px}
+.note{background:var(--gold-l);border:1px solid #ecd9a8;border-radius:12px;padding:12px 16px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#ece7da;font-weight:500;width:30%}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin:8px 0}
+summary{cursor:pointer;font-weight:700}
+.hint{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><div class="in"><b>📚 40일 독서기록장 · 사용 안내</b><nav><a href="teacher.html">선생님용</a><a href="index.html">학생 화면</a></nav></div></header>
+<main>
+  <h1>40일 독서기록장</h1>
+  <p>경기도 중학생을 위한 <b>40일 자율 독서 웹 기록장</b>이에요. 학생은 경기도교육청 전자도서관에서 책 한 권을 골라 40일 동안 읽으며 <b>읽기 전 → 읽는 중 → 읽은 후 → 독후활동 → 마무리</b> 순서로 기록하고, 기록장 파일을 선생님의 제출 폴더에 올려요.</p>
+  <div class="ok">✅ <b>회원가입 없음 · 서버 저장 없음 · 데이터베이스 없음.</b> 학생 기록은 학생 기기의 브라우저에만 남고, 학생이 직접 파일을 제출할 때만 선생님께 전달돼요.</div>
+  <p class="toc" style="margin-top:16px"><a href="#t">선생님 사용 순서</a><a href="#s">학생 사용 순서</a><a href="#p">개인정보 안내</a><a href="#q">자주 묻는 질문</a></p>
+
+  <h2 id="t">선생님 사용 순서</h2>
+  <ol>
+    <li><b>제출 폴더 만들기</b> — OneDrive의 <b>‘파일 요청’</b> 링크(추천) 또는 Google 설문지의 ‘파일 업로드’ 질문 링크를 준비해요.</li>
+    <li><b><a href="teacher.html">선생님용 페이지</a>에서 우리 반 링크 만들기</b> — 학교, 시작일, 중간 점검일, 제출 링크, 독후활동 방식(자유 선택 / 목록 중 선택 / 교사 지정)을 정하고 ‘링크 만들기’를 눌러요.</li>
+    <li><b>학생에게 안내하기</b> — 링크를 학급 게시판에 올리거나, ‘안내문 인쇄’로 QR코드를 띄워요. 첫 시간에 학생들이 즐겨찾기를 하도록 함께 해 주세요.</li>
+    <li><b>중간 점검</b> — 정한 날에는 학생 화면에 ‘제출하세요’ 알림이 떠요. 제출된 파일을 <a href="collect.html">모아보기</a>에 끌어다 놓으면 학급 현황표가 만들어져요.</li>
+    <li><b>마무리</b> — 마지막 날 학생들이 최종 기록장을 제출해요. 모아보기에서 엑셀(CSV)로 저장해 두세요.</li>
+  </ol>
+  <div class="note"><b>링크를 꼭 보관하세요.</b> 설정은 링크 안에만 들어 있어요. 설정을 고칠 때는 선생님용 페이지의 ‘불러오기’에 예전 링크를 붙여 넣고 고친 뒤 다시 만들면 돼요. 학급 코드가 같으면 학생 기록은 그대로 이어져요.</div>
+
+  <h3>독후활동 19가지</h3>
+  <table>
+    <tr><th>✍ 쓰기</th><td>친구에게 책 소개하기 · 추천서 · 인물에게 편지(소설) · 작가에게 엽서 · 뒷이야기 쓰기(소설) · 서평 · 독서감상문</td></tr>
+    <tr><th>🧠 생각 정리</th><td>인물 탐구(소설) · 인물꽃(소설) · 마인드맵 · 질문과 대답 · 자료 찾아 정리하기 · 내 삶에 적용하기(비문학) · 토론 준비하기</td></tr>
+    <tr><th>🎨 표현</th><td>4컷 만화 · 그림으로 표현하기 · 책 광고 · 퀴즈 만들기 · 가상 인터뷰</td></tr>
+  </table>
+
+  <h2 id="s">학생 사용 순서</h2>
+  <ol>
+    <li>선생님이 준 링크나 QR코드로 들어가 <b>즐겨찾기</b>해요. 40일 동안 <b>같은 기기, 같은 브라우저</b>로 들어와요.</li>
+    <li>‘내 책’에 내 정보와 책 정보를 쓰고, 책의 갈래(소설·비문학)를 골라요.</li>
+    <li>읽은 날마다 ‘② 읽는 중’에 한 줄이라도 기록해요. 달력에 도장이 찍혀요.</li>
+    <li>다 읽으면 ③ 읽은 후, ④ 독후활동, ⑤ 마무리를 차례로 해요.</li>
+    <li>⑤에서 <b>기록장 파일 저장</b> → <b>제출 폴더 열기</b> → 저장한 파일을 올려요.</li>
+  </ol>
+  <div class="note"><b>기록 지키기</b> — 기록은 그 기기에만 있어요. 일주일에 한 번쯤 ‘기록 파일 저장’을 눌러 두세요. 기기를 바꾸면 새 기기에서 링크를 열고 ⑤의 ‘기록 불러오기’로 저장한 파일을 넣으면 이어 쓸 수 있어요.</div>
+
+  <h2 id="p">개인정보 안내</h2>
+  <table>
+    <tr><th>모으는 정보</th><td>없음. 이 사이트는 학생이나 선생님의 정보를 서버에 저장하지 않아요. 로그인, 쿠키 추적, 분석 도구도 쓰지 않아요.</td></tr>
+    <tr><th>학생 기록이 저장되는 곳</th><td>학생 기기 브라우저의 저장 공간(localStorage)에만 있어요. 같은 기기의 다른 사람이 같은 브라우저로 열면 볼 수 있으니, 공용 기기에서는 다 쓴 뒤 ⑤의 ‘이 기기에서 내 기록 지우기’를 눌러요.</td></tr>
+    <tr><th>선생님께 전달되는 때</th><td>학생이 직접 기록장 파일을 저장해 선생님의 제출 폴더(OneDrive·Google Drive)에 올릴 때뿐이에요. 제출된 파일의 관리는 그 서비스와 학교의 개인정보 지침을 따라요.</td></tr>
+    <tr><th>학급 설정</th><td>링크 주소의 # 뒤에 들어 있어요. # 뒤의 내용은 웹 서버로 전송되지 않아요.</td></tr>
+    <tr><th>외부 연결</th><td>학생 화면은 외부 서버에서 아무것도 불러오지 않아요. 선생님용 페이지만 QR코드를 그리는 공개 프로그램(cdnjs)을 불러와요. 전자도서관과 제출 폴더 버튼은 학생이 누를 때만 해당 사이트로 이동해요.</td></tr>
+  </table>
+
+  <h2 id="q">자주 묻는 질문</h2>
+  <details><summary>학생이 쓴 내용이 사라졌어요.</summary><p>다른 기기나 다른 브라우저로 들어왔거나, 인터넷 사용 기록을 지웠을 수 있어요. 시크릿(InPrivate) 창은 창을 닫으면 기록이 지워져요. 예전에 저장한 기록장 파일이 있으면 ⑤의 ‘기록 불러오기’로 되살릴 수 있어요. 그래서 중간 점검 제출이 백업 역할도 해요.</p></details>
+  <details><summary>아이패드·아이폰(사파리)에서 써도 되나요?</summary><p>쓸 수 있지만, 사파리는 7일 넘게 방문하지 않은 사이트의 저장 내용을 지울 수 있어요. 자주 들어오고, 가끔 기록 파일을 저장하게 안내해 주세요. 홈 화면에 추가해서 쓰면 더 안전해요.</p></details>
+  <details><summary>학생이 링크를 잃어버렸어요.</summary><p>같은 기기라면 사이트 첫 화면(주소의 # 앞부분)만 열어도 마지막으로 쓴 학급으로 자동으로 들어가요. 다른 기기라면 선생님이 링크를 다시 알려 주세요.</p></details>
+  <details><summary>시작한 뒤에 설정(제출 링크, 활동 방식)을 바꾸고 싶어요.</summary><p>선생님용 페이지 → ‘불러오기’에 예전 링크를 넣고 고친 뒤 ‘링크 만들기’를 누르세요. 학급 코드가 같아서 학생 기록은 이어져요. 학생들에게 새 링크를 다시 열게 안내하면 돼요.</p></details>
+  <details><summary>학생이 링크를 고쳐서 활동 조건을 바꿀 수 있나요?</summary><p>링크 안에 설정이 들어 있어 이론상 가능해요. 그런 경우 학생 화면과 제출 파일에 ‘링크 변경’ 표시가 나타나고, 모아보기의 ‘확인’ 칸에도 보여요.</p></details>
+  <details><summary>여러 반을 가르쳐요.</summary><p>반마다 ‘새 학급으로 시작’을 눌러 링크를 따로 만들면 반별로 따로 관리돼요. 한 링크를 여러 반이 같이 써도 괜찮아요. 모아보기에서 반-번호로 정렬하면 돼요.</p></details>
+  <details><summary>전자책 대출 기간이 40일보다 짧아요.</summary><p>경기도교육청 전자도서관은 대출 기간이 정해져 있어요. 다 못 읽었으면 연장하거나 다시 빌리도록 안내해 주세요. 정확한 대출 규정은 전자도서관 누리집에서 확인해 주세요.</p></details>
+
+  <p class="hint" style="margin-top:30px">40일 독서기록장 v1.0 · 광탄중학교 독서기록장 양식을 바탕으로 만들었어요.</p>
+</main>
+</body>
+</html>
