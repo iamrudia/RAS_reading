@@ -20,4 +20,9 @@
 2. 링크나 QR코드를 학생에게 안내
 3. 중간 점검일·마지막 날에 제출된 파일을 `collect.html`에 끌어다 놓기
 
+사이트 주소: https://iamrudia.github.io/RAS_reading/ · 선생님용: https://iamrudia.github.io/RAS_reading/teacher.html
+
+## 만든 사람 · 문의
+광탄중학교 기술교사 **강은영** · ✉ iamrudia@copilot.pe.kr · 💬 카카오톡 iamrudia
+
 광탄중학교 독서기록장 양식을 바탕으로 만들었습니다.
