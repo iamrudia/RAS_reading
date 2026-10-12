@@ -3,14 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>제출 파일 모아보기 – 40일 독서기록장</title>
+<link rel="icon" href="stamp.webp">
+<title>제출 파일 모아보기 – 북로드</title>
 <style>
-:root{--paper:#f4f1ea;--card:#fffefb;--ink:#1d2321;--muted:#626b67;--line:#dcd7cb;--teal:#1f6f68;--teal-l:#dcefeb;--navy:#2c4a7a;--red:#b23a32;--gold:#b8892f;--gold-l:#f6ecd4;
+:root{--paper:#f6f3ec;--card:#fffefb;--ink:#1f1c2e;--muted:#626b67;--line:#dcd7cb;--teal:#3b34a8;--teal-l:#ebe9fa;--navy:#2c4a7a;--red:#b23a32;--gold:#b8892f;--gold-l:#f6ecd4;
   --serif:'Noto Serif KR','Noto Serif CJK KR','Nanum Myeongjo','Batang',serif;--sans:'Pretendard','Noto Sans KR','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;font-size:16px;word-break:keep-all}
 a{color:var(--navy)}
-header{background:var(--ink);color:#fff}
+header{background:linear-gradient(120deg,#2b2588,#3b34a8 60%,#5a4fd0);color:#fff}
+header .logo{width:34px;height:34px;transform:rotate(-8deg);background:#fff;border-radius:50%;padding:2px}
 header .in{max-width:1200px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 header b{font-family:var(--serif);font-size:19px}
 header nav{margin-left:auto;display:flex;gap:14px;font-size:14px} header nav a{color:#fff}
@@ -42,7 +44,7 @@ tr:hover td{background:#faf8f2}
 </style>
 </head>
 <body>
-<header><div class="in"><b>📚 40일 독서기록장 · 제출 파일 모아보기</b><nav><a href="teacher.html">링크 만들기</a><a href="guide.html" target="_blank">사용 안내</a></nav></div></header>
+<header><div class="in"><img class="logo" src="stamp.webp" alt=""><b>북로드 · 제출 파일 모아보기</b><nav><a href="teacher.html">링크 만들기</a><a href="guide.html" target="_blank">사용 안내</a></nav></div></header>
 <main>
   <h1>제출 파일 모아보기</h1>
   <p class="lead">제출 폴더에서 내려받은 학생 기록장 파일(.html)을 한꺼번에 끌어다 놓으세요. <b>파일은 이 컴퓨터 안에서만 읽고, 어디로도 보내지 않아요.</b></p>
@@ -68,7 +70,7 @@ tr:hover td{background:#faf8f2}
   </div>
 </main>
 
-<script src="core.js"></script>
+<script src="core.js?v=1.1"></script>
 <script>
 (function(){
 'use strict';
@@ -76,7 +78,7 @@ var R=R40,ROWS=[],SORT={k:'no',d:1};
 function $(s){return document.querySelector(s)}
 var esc=R.esc;
 var COLS=[
- ['no','반-번호'],['name','이름'],['title','책 제목'],['genre','갈래'],['day','저장 시점'],['logs','일지'],['logDays','기록일'],['pct','진행률'],['quotes','구절'],
+ ['no','학년-반-번호'],['name','이름'],['title','책 제목'],['genre','갈래'],['day','저장 시점'],['logs','일지'],['logDays','기록일'],['pct','진행률'],['quotes','구절'],
  ['pre','①'],['during','②'],['post','③'],['act','④ 활동'],['fin','⑤'],['star','별점'],['cls','학급'],['flag','확인']];
 
 function parse(name,text){var m=text.match(/<script type="application\/json" id="rdata">([\s\S]*?)<\/script>/);if(!m)return null;
@@ -94,7 +96,7 @@ function render(){var rows=visible();
   rows.sort(function(a,b){var x=a[SORT.k],y=b[SORT.k];if(typeof x==='string'||typeof y==='string'){x=String(x);y=String(y);return x.localeCompare(y,'ko')*SORT.d}return ((+x||0)-(+y||0))*SORT.d});
   var ids={};rows.forEach(function(r){if(r.classId)ids[r.classId]=1});var multi=Object.keys(ids).length>1;
   $('#tbl').innerHTML='<tr>'+COLS.map(function(c){return '<th class="'+(c[0].length<6&&c[1].length<3?'c':'')+'" data-k="'+c[0]+'">'+c[1]+(SORT.k===c[0]?(SORT.d>0?' ▲':' ▼'):'')+'</th>'}).join('')+'</tr>'+
-   rows.map(function(r){var i=ROWS.indexOf(r);return '<tr><td>'+esc(r.grade+'-'+r.clsNo+'-'+r.num)+'</td><td><a href="#" data-open="'+i+'">'+esc(r.name)+'</a></td><td>'+esc(r.title)+'</td><td>'+esc(r.genre)+'</td>'+
+   rows.map(function(r){var i=ROWS.indexOf(r);return '<tr><td>'+esc(R.gradeLabel(r.grade)+'-'+r.clsNo+'-'+r.num)+'</td><td><a href="#" data-open="'+i+'">'+esc(r.name)+'</a></td><td>'+esc(r.title)+'</td><td>'+esc(r.genre)+'</td>'+
     '<td class="hint">'+(r.savedAt?esc(new Date(r.savedAt).toLocaleDateString('ko-KR'))+(r.day?' ('+esc(r.day)+'일째)':''):'')+'</td>'+
     '<td class="c">'+r.logs+'</td><td class="c">'+r.logDays+'</td><td><span class="mini"><i style="width:'+r.pct+'%"></i></span>'+r.pct+'%</td><td class="c">'+r.quotes+'</td>'+
     '<td class="c">'+mark(r.pre)+'</td><td class="c">'+mark(r.during)+'</td><td class="c">'+mark(r.post)+'</td><td class="c">'+mark(r.act)+' '+r.sm.actDone+'/'+r.sm.actNeed+'</td><td class="c">'+mark(r.fin)+'</td>'+
@@ -104,12 +106,12 @@ function render(){var rows=visible();
   $('#result').style.display=ROWS.length?'':'none'}
 function addFiles(list){var arr=[].slice.call(list).filter(function(f){return /\.html?$/i.test(f.name)}),left=arr.length,bad=0;if(!left)return;
   arr.forEach(function(f){var rd=new FileReader();rd.onload=function(){var r=parse(f.name,rd.result);if(r){ROWS=ROWS.filter(function(x){return !(x.file===r.file&&x.savedAt===r.savedAt)});ROWS.push(r)}else bad++;
-    if(--left===0){render();if(bad)alert(bad+'개 파일은 독서기록장 파일이 아니어서 건너뛰었어요.')}};rd.readAsText(f)})}
+    if(--left===0){render();if(bad)alert(bad+'개 파일은 북로드 기록장 파일이 아니어서 건너뛰었어요.')}};rd.readAsText(f)})}
 function csv(){var rows=visible(),head=['학년','반','번호','이름','책 제목','갈래','저장일','저장 시점(일째)','일지 횟수','기록일','진행률(%)','구절 수','질문 수','읽기 전','읽는 중','읽은 후','독후활동','완료 활동 수','필요 활동 수','활동 목록','마무리','별점','학급','확인'];
   var st=function(v){return v===2?'완료':v===1?'작성 중':'시작 전'};
-  var lines=[head].concat(rows.map(function(r){return [r.grade,r.clsNo,r.num,r.name,r.title,r.genre,r.savedAt?new Date(r.savedAt).toLocaleDateString('ko-KR'):'',r.day,r.logs,r.logDays,r.pct,r.quotes,r.sm.qs,st(r.pre),st(r.during),st(r.post),st(r.act),r.sm.actDone,r.sm.actNeed,r.sm.actNames.join(' / '),st(r.fin),r.star||'',r.cls,r.flag]}));
+  var lines=[head].concat(rows.map(function(r){return [R.gradeLabel(r.grade),r.clsNo,r.num,r.name,r.title,r.genre,r.savedAt?new Date(r.savedAt).toLocaleDateString('ko-KR'):'',r.day,r.logs,r.logDays,r.pct,r.quotes,r.sm.qs,st(r.pre),st(r.during),st(r.post),st(r.act),r.sm.actDone,r.sm.actNeed,r.sm.actNames.join(' / '),st(r.fin),r.star||'',r.cls,r.flag]}));
   var s='﻿'+lines.map(function(l){return l.map(function(v){v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')}).join('\r\n');
-  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));a.download='독서기록장_현황_'+R.today()+'.csv';a.click()}
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));a.download='북로드_현황_'+R.today()+'.csv';a.click()}
 
 document.addEventListener('DOMContentLoaded',function(){
   var d=$('#drop');

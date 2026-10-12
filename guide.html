@@ -3,14 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>사용 안내 – 40일 독서기록장</title>
+<link rel="icon" href="stamp.webp">
+<title>사용 안내 – 북로드 (Book ROAD)</title>
 <style>
-:root{--paper:#f4f1ea;--card:#fffefb;--ink:#1d2321;--muted:#626b67;--line:#dcd7cb;--teal:#1f6f68;--teal-l:#dcefeb;--navy:#2c4a7a;--gold-l:#f6ecd4;
+:root{--paper:#f6f3ec;--card:#fffefb;--ink:#1f1c2e;--muted:#626b67;--line:#dcd7cb;--teal:#3b34a8;--teal-l:#ebe9fa;--navy:#2c4a7a;--gold-l:#f6ecd4;
   --serif:'Noto Serif KR','Noto Serif CJK KR','Nanum Myeongjo','Batang',serif;--sans:'Pretendard','Noto Sans KR','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.75;font-size:16px;word-break:keep-all;overflow-wrap:anywhere}
 a{color:var(--navy)}
-header{background:var(--ink);color:#fff}
+header{background:linear-gradient(120deg,#2b2588,#3b34a8 60%,#5a4fd0);color:#fff}
+header .logo{width:34px;height:34px;transform:rotate(-8deg);background:#fff;border-radius:50%;padding:2px}
 header .in{max-width:860px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 header b{font-family:var(--serif);font-size:19px}
 header nav{margin-left:auto;display:flex;gap:14px;font-size:14px} header nav a{color:#fff}
@@ -34,10 +36,10 @@ summary{cursor:pointer;font-weight:700}
 </style>
 </head>
 <body>
-<header><div class="in"><b>📚 40일 독서기록장 · 사용 안내</b><nav><a href="teacher.html">선생님용</a><a href="index.html">학생 화면</a></nav></div></header>
+<header><div class="in"><img class="logo" src="stamp.webp" alt=""><b>북로드 · 사용 안내</b><nav><a href="teacher.html">선생님용</a><a href="index.html">학생 화면</a></nav></div></header>
 <main>
-  <h1>40일 독서기록장</h1>
-  <p>경기도 중학생을 위한 <b>40일 자율 독서 웹 기록장</b>이에요. 학생은 경기도교육청 전자도서관에서 책 한 권을 골라 40일 동안 읽으며 <b>읽기 전 → 읽는 중 → 읽은 후 → 독후활동 → 마무리</b> 순서로 기록하고, 기록장 파일을 선생님의 제출 폴더에 올려요.</p>
+  <h1>북로드 <span style="font-size:16px;color:var(--muted);font-weight:400">Book ROAD · 한 권의 길을 걷는 독서기록장</span></h1>
+  <p>경기도 중·고등학생을 위한 <b>자율 독서 웹 기록장</b>이에요(기본 40일, 선생님이 기간을 정해요). 학생은 경기도교육청 전자도서관에서 책 한 권을 골라 끝까지 읽으며 <b>읽기 전 → 읽는 중 → 읽은 후 → 독후활동 → 마무리</b> 순서로 기록하고, 기록장 파일을 선생님의 제출 폴더에 올려요.</p>
   <div class="ok">✅ <b>회원가입 없음 · 서버 저장 없음 · 데이터베이스 없음.</b> 학생 기록은 학생 기기의 브라우저에만 남고, 학생이 직접 파일을 제출할 때만 선생님께 전달돼요.</div>
   <p class="toc" style="margin-top:16px"><a href="#t">선생님 사용 순서</a><a href="#s">학생 사용 순서</a><a href="#p">개인정보 안내</a><a href="#q">자주 묻는 질문</a><a href="#m">만든 사람·문의</a></p>
 
@@ -60,9 +62,9 @@ summary{cursor:pointer;font-weight:700}
 
   <h2 id="s">학생 사용 순서</h2>
   <ol>
-    <li>선생님이 준 링크나 QR코드로 들어가 <b>즐겨찾기</b>해요. 40일 동안 <b>같은 기기, 같은 브라우저</b>로 들어와요.</li>
+    <li>선생님이 준 링크나 QR코드로 들어가 <b>즐겨찾기</b>해요. 기간 동안 <b>같은 기기, 같은 브라우저</b>로 들어와요.</li>
     <li>‘내 책’에 내 정보와 책 정보를 쓰고, 책의 갈래(소설·비문학)를 골라요.</li>
-    <li>읽은 날마다 ‘② 읽는 중’에 한 줄이라도 기록해요. 달력에 도장이 찍혀요.</li>
+    <li>읽은 날마다 ‘② 읽는 중’에 한 줄이라도 기록해요. <b>‘오늘의 독서 완료’ 도장</b>이 달력에 찍혀요. 날짜는 숫자 8자리(예: 20261012)로 쓰거나 📅 버튼으로 골라요.</li>
     <li>다 읽으면 ③ 읽은 후, ④ 독후활동, ⑤ 마무리를 차례로 해요.</li>
     <li>⑤에서 <b>기록장 파일 저장</b> → <b>제출 폴더 열기</b> → 저장한 파일을 올려요.</li>
   </ol>
@@ -84,6 +86,7 @@ summary{cursor:pointer;font-weight:700}
   <details><summary>시작한 뒤에 설정(제출 링크, 활동 방식)을 바꾸고 싶어요.</summary><p>선생님용 페이지 → ‘불러오기’에 예전 링크를 넣고 고친 뒤 ‘링크 만들기’를 누르세요. 학급 코드가 같아서 학생 기록은 이어져요. 학생들에게 새 링크를 다시 열게 안내하면 돼요.</p></details>
   <details><summary>학생이 링크를 고쳐서 활동 조건을 바꿀 수 있나요?</summary><p>링크 안에 설정이 들어 있어 이론상 가능해요. 그런 경우 학생 화면과 제출 파일에 ‘링크 변경’ 표시가 나타나고, 모아보기의 ‘확인’ 칸에도 보여요.</p></details>
   <details><summary>여러 반을 가르쳐요.</summary><p>반마다 ‘새 학급으로 시작’을 눌러 링크를 따로 만들면 반별로 따로 관리돼요. 한 링크를 여러 반이 같이 써도 괜찮아요. 모아보기에서 반-번호로 정렬하면 돼요.</p></details>
+  <details><summary>고등학생도 쓸 수 있나요?</summary><p>네. 학생이 학년에서 고1~고3을 고르면 고등학생 수준의 길잡이 문장(관점·비판·맥락·진로 연결)이 나와요.</p></details>
   <details><summary>전자책 대출 기간이 40일보다 짧아요.</summary><p>경기도교육청 전자도서관은 대출 기간이 정해져 있어요. 다 못 읽었으면 연장하거나 다시 빌리도록 안내해 주세요. 정확한 대출 규정은 전자도서관 누리집에서 확인해 주세요.</p></details>
 
   <h2 id="m">만든 사람 · 문의</h2>
@@ -93,7 +96,7 @@ summary{cursor:pointer;font-weight:700}
     💬 카카오톡: iamrudia<br>
     <span class="hint">사용하다 불편한 점, 오류, 바라는 기능이 있으면 편하게 연락해 주세요.</span>
   </div>
-  <p class="hint" style="margin-top:20px">40일 독서기록장 v1.0 · 광탄중학교 독서기록장 양식을 바탕으로 만들었어요.</p>
+  <p class="hint" style="margin-top:20px">북로드 v1.1 · 광탄중학교 독서기록장 양식을 바탕으로 만들었어요.</p>
 </main>
 </body>
 </html>

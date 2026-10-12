@@ -1,11 +1,11 @@
-/* 40일 독서기록장 – 공통 데이터와 계산 (학생 페이지·교사 페이지·모아보기가 함께 씀)
+/* 북로드(Book ROAD) – 공통 데이터와 계산 (학생 페이지·교사 페이지·모아보기가 함께 씀)
    서버·데이터베이스 없음. 학급 설정은 링크(#c=…) 안에, 학생 기록은 학생 브라우저에만 저장된다. */
 (function(g){
 'use strict';
-var R={VERSION:'1.0'};
+var R={VERSION:'1.1',NAME:'북로드',SUB:'한 권의 길을 걷는 독서기록장'};
 
 /* 학급 설정 기본값 */
-R.DEF={v:1,id:'',school:'',cls:'',title:'40일 독서기록장',days:40,start:'',checks:[10,20,30],
+R.DEF={v:1,id:'',school:'',cls:'',title:'북로드',days:40,start:'',checks:[10,20,30],
   elib:'https://lib.goe.go.kr/elib/index.do',upload:'',uploadLabel:'제출 폴더',mode:'free',acts:[],count:1};
 R.full=function(c){var o={};for(var k in R.DEF)o[k]=R.DEF[k];if(c)for(var j in c)if(c[j]!=null)o[j]=c[j];return o};
 
@@ -42,8 +42,14 @@ R.GH={
  feel:['가장 기억에 남는 장면과 그때 든 마음을 솔직하게 써요.','내 생각과 그렇게 생각한 근거(책 속 장면이나 문장)를 함께 써요.','작가가 전하려는 생각에 대한 나의 평가와 근거, 그리고 내 삶과의 연결을 써요.'],
  best:['이 부분을 읽을 때 어떤 장면이 떠오르거나 어떤 기분이 들었나요?','이 부분이 책 전체에서 왜 중요한지, 나에게 왜 와닿았는지 써요.','이 부분이 책의 주제와 어떻게 이어지는지, 나의 생각을 어떻게 바꾸었는지 써요.']
 };
+/* 고등학교 1~3학년 길잡이 (학년 값 4~6) */
+R.GH.summary.push('사건의 흐름과 인물의 변화를 짚고, 그 과정에서 드러나는 주제를 한 문장으로 덧붙여요.','서술 방식(시점·구성)이 이야기의 의미를 어떻게 만드는지까지 드러나게 정리해요.','작품의 시대·사회적 맥락을 함께 고려해 갈등과 주제를 압축적으로 정리해요.');
+R.GH.key.push('글쓴이의 핵심 주장과 근거를 구분하고, 각 근거의 종류(사실·통계·사례·전문가 의견)를 밝혀요.','주장과 근거의 타당성·신뢰성을 따져 보고, 빠진 관점이 없는지 짚어요.','이 책의 주장을 같은 주제의 다른 글·자료와 견주어 공통점과 차이점을 정리해요.');
+R.GH.feel.push('작품(책)이 던지는 질문에 대한 나의 관점을 근거와 함께 써요.','동의하는 점과 비판할 점을 균형 있게 쓰고, 내 생각이 어떻게 바뀌었는지 밝혀요.','책의 문제의식을 나의 진로·사회 문제와 연결해 깊이 있는 나의 견해로 정리해요.');
+R.GH.best.push('이 부분의 표현이나 논리가 왜 인상적인지 분석해 써요.','이 부분이 작품 전체의 주제나 글쓴이의 의도와 어떻게 연결되는지 써요.','이 부분을 다른 작품·사회 현상과 연결해 나만의 해석을 써요.');
+R.gradeLabel=function(g){g=+g||0;return g>=4?'고'+(g-3):g>=1?'중'+g:''};
 R.RUB=[
- ['꾸준히 읽기','계획을 세워 40일 동안 꾸준히 읽고 일지를 자주 기록했다','대체로 계획대로 읽고 일지를 기록했다','몰아서 읽거나 기록이 적었다'],
+ ['꾸준히 읽기','계획을 세워 기간 동안 꾸준히 읽고 일지를 자주 기록했다','대체로 계획대로 읽고 일지를 기록했다','몰아서 읽거나 기록이 적었다'],
  ['내용 이해','줄거리(핵심 내용)를 정확하고 짜임새 있게 정리했다','줄거리(핵심 내용)를 대체로 정리했다','내용 정리가 부족했다'],
  ['생각과 근거','내 생각을 책 속 근거와 함께 분명하게 썼다','내 생각을 썼으나 근거가 부족했다','느낌을 짧게만 썼다'],
  ['표현과 나눔','독후활동을 개성 있게 완성하고, 함께 나눌 좋은 질문을 만들었다','독후활동을 완성하고 질문을 만들었다','독후활동이나 질문이 미완성이다']
@@ -60,6 +66,24 @@ R.addD=function(s,n){var d=R.pd(s);d.setDate(d.getDate()+n);return R.iso(d)};
 R.diff=function(a,b){return Math.round((R.pd(b)-R.pd(a))/86400000)};
 R.md=function(s){var d=R.pd(s);return (d.getMonth()+1)+'/'+d.getDate()};
 R.today=function(){return R.iso(new Date())};
+/* 날짜: 숫자 8자리(yyyymmdd)로 입력 → yyyy-mm-dd */
+R.digits8=function(v){return String(v==null?'':v).replace(/\D/g,'').slice(0,8)};
+R.fmtDate=function(v){var d=R.digits8(v);return d.slice(0,4)+(d.length>4?'-'+d.slice(4,6):'')+(d.length>6?'-'+d.slice(6):'')};
+R.parseDate=function(v){var d=R.digits8(v);if(d.length!==8)return '';var y=+d.slice(0,4),m=+d.slice(4,6),dd=+d.slice(6),t=new Date(y,m-1,dd);
+  if(y<2000||y>2100||t.getMonth()!==m-1||t.getDate()!==dd)return '';return R.iso(t)};
+/* 글자 입력칸을 날짜 칸으로: 숫자만 받고 자동으로 - 를 넣음, 📅 버튼으로 달력 선택 */
+R.dateField=function(el,onChange){
+  el.setAttribute('inputmode','numeric');el.setAttribute('maxlength','10');el.setAttribute('autocomplete','off');if(!el.placeholder)el.placeholder='예: '+R.digits8(R.today());
+  var wrap=document.createElement('span');wrap.className='dtwrap';el.parentNode.insertBefore(wrap,el);wrap.appendChild(el);
+  var b=document.createElement('button');b.type='button';b.className='dtbtn';b.title='달력에서 고르기';b.setAttribute('aria-label','달력에서 고르기');b.textContent='📅';
+  var p=document.createElement('input');p.type='date';p.className='dtpick';p.tabIndex=-1;p.setAttribute('aria-hidden','true');p.min='2000-01-01';p.max='2100-12-31';
+  wrap.appendChild(b);wrap.appendChild(p);
+  function upd(){var iso=R.parseDate(el.value),n=R.digits8(el.value).length;el.classList.toggle('bad',n===8&&!iso);if(onChange)onChange(iso,el.value)}
+  el.addEventListener('input',function(){var f=R.fmtDate(el.value);if(f!==el.value)el.value=f;upd()});
+  el.addEventListener('blur',function(){var iso=R.parseDate(el.value);if(iso)el.value=iso});
+  b.addEventListener('click',function(){p.value=R.parseDate(el.value)||R.today();try{p.showPicker()}catch(e){p.focus();p.click()}});
+  p.addEventListener('change',function(){if(!p.value)return;el.value=p.value;upd()});
+};
 R.uid=function(n){var c='abcdefghijkmnpqrstuvwxyz23456789',s='';for(var i=0;i<(n||6);i++)s+=c[Math.floor(Math.random()*c.length)];return s};
 
 /* ───────── 설정 ↔ 링크 ───────── */
