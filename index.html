@@ -117,11 +117,21 @@ body.g-fic [data-genre=non], body.g-non [data-genre=fic]{display:none!important}
 .stat span{font-size:13px;color:var(--muted)}
 .bar{height:12px;background:#e6e1d4;border-radius:999px;overflow:hidden}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),#7a6ff0);border-radius:999px;transition:width .4s}
-.cal{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}
-.cal .d{aspect-ratio:1;border-radius:9px;background:#fff;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;color:var(--muted);line-height:1.15;position:relative}
-.cal .d b{font-size:14px;color:var(--ink)}
-.cal .d.done{background:#fff;border-color:#cfcaf0}
-.cal .d.done::before{content:'';position:absolute;inset:1px;background:url(stamp.webp) center/contain no-repeat;transform:rotate(var(--r,0deg));mix-blend-mode:multiply;opacity:.92}
+.board{margin-top:18px;padding:22px 22px 24px}
+.boardHead{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px;margin-bottom:14px}
+.boardHead h3{margin:0;font-size:21px}
+.today{margin:14px 0 0;padding:12px 14px;border-radius:14px;background:var(--teal-l);font-size:15px;display:flex;gap:10px;align-items:center}
+.today img{width:46px;height:46px;transform:rotate(-8deg);flex:none}
+.today.no{background:var(--gold-l)}
+.cal{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:10px}
+@media (max-width:900px){.cal{grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}}
+@media (max-width:640px){.cal{grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}}
+.cal .d{aspect-ratio:1;border-radius:16px;background:#fff;border:1.5px dashed #d9d3e8;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:var(--muted);line-height:1.2;position:relative}
+.cal .d b{font-size:22px;color:var(--ink);font-family:var(--serif)}
+.cal .d.done{background:#fff;border:1.5px solid #cfcaf0}
+.cal .d.done b{position:absolute;top:5px;left:7px;z-index:1;font-size:12px;font-family:var(--sans);background:rgba(255,255,255,.9);border-radius:6px;padding:0 5px;color:var(--teal-d)}
+.cal .d.done .md{display:none}
+.cal .d.done::before{content:'';position:absolute;inset:3px;background:url(stamp.webp) center/contain no-repeat;transform:rotate(var(--r,0deg));mix-blend-mode:multiply;opacity:.92}
 .stampfx{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;background:rgba(244,241,234,.6);opacity:0;transition:opacity .3s}
 .stampfx.on{opacity:1}
 .stampfx img{width:min(62vw,300px);transform:rotate(-8deg)}
@@ -131,7 +141,7 @@ body.g-fic [data-genre=non], body.g-non [data-genre=fic]{display:none!important}
 @media (prefers-reduced-motion:reduce){.stampfx.on img{animation:none}}
 .cal .d.today{outline:3px solid var(--gold);outline-offset:1px}
 .cal .d.future{opacity:.55}
-.cal .d.cp::after{content:'📌';position:absolute;top:-6px;right:-4px;font-size:12px}
+.cal .d.cp::after{content:'📌';position:absolute;top:-8px;right:-5px;font-size:16px;z-index:2}
 
 .logform{display:grid;grid-template-columns:170px 1fr 110px 1.6fr 90px auto;gap:8px;align-items:end}
 @media (max-width:820px){.logform{grid-template-columns:1fr 1fr}}
@@ -229,9 +239,14 @@ table.t td.c{text-align:center;white-space:nowrap}
         <div class="stat"><b id="stPct">0%</b><span>읽은 정도</span></div>
       </div>
       <div class="bar"><i id="pctBar" style="width:0"></i></div>
-      <p class="hint" id="calInfo" style="margin:10px 0 6px"></p>
-      <div class="cal" id="cal"></div>
+      <div class="today" id="todayBox"></div>
+      <div class="btns"><button class="btn teal" data-go="during">✍ 오늘 기록하고 도장 받기</button></div>
     </div>
+  </div>
+
+  <div class="card board">
+    <div class="boardHead"><h3>📮 나의 독서 도장판</h3><span class="hint" id="calInfo"></span></div>
+    <div class="cal" id="cal"></div>
   </div>
 
   <div class="grid2" style="margin-top:8px">
@@ -514,9 +529,13 @@ function renderHome(){
   $('#stDay').textContent=n<1?'D'+(n-1):n>D?'끝':n+'일';
   $('#stLogs').textContent=sm.logDays+'개';
   $('#stPct').textContent=sm.pct+'%';$('#pctBar').style.width=sm.pct+'%';
-  $('#calInfo').textContent=md(s)+' 시작 ~ '+md(addD(s,D-1))+' 끝 · 독서 일지를 저장한 날에 도장이 찍혀요'+(cps.length?' · 📌 중간 점검':'');
+  $('#calInfo').textContent=md(s)+' 시작 ~ '+md(addD(s,D-1))+' 끝 · 독서 일지를 저장한 날에 도장이 찍혀요'+(cps.length?' · 📌 중간 점검일':'');
+  var nextCp=cps.filter(function(c){return c>=n}).sort(function(a,b){return a-b})[0];
+  $('#todayBox').className='today'+(dates[t]?'':' no');
+  $('#todayBox').innerHTML=dates[t]?'<img src="stamp.webp" alt=""><span><b>오늘의 도장을 받았어요!</b><br><span class="hint">내일도 한 쪽, 이어서 걸어가요.</span></span>'
+    :'<span style="font-size:26px">📖</span><span><b>아직 오늘의 도장이 없어요.</b><br><span class="hint">'+(nextCp&&n>=1?'다음 중간 점검은 '+nextCp+'일째('+md(addD(s,nextCp-1))+')예요.':'조금이라도 읽고 기록하면 도장이 찍혀요.')+'</span></span>';
   var h='';for(var i=0;i<D;i++){var d=addD(s,i),c='d'+(dates[d]?' done':'')+(d===t?' today':'')+(d>t?' future':'')+(cps.indexOf(i+1)>=0?' cp':'');
-    h+='<div class="'+c+'" title="'+d+(dates[d]?' 독서 완료':'')+'"'+(dates[d]?' style="--r:'+((i*37)%25-12)+'deg"':'')+'><b>'+(i+1)+'</b>'+md(d)+'</div>'}
+    h+='<div class="'+c+'" title="'+(i+1)+'일째 · '+d+(dates[d]?' 독서 완료':'')+'"'+(dates[d]?' style="--r:'+((i*37)%25-12)+'deg"':'')+'><b>'+(i+1)+'</b><span class="md">'+md(d)+'</span></div>'}
   $('#cal').innerHTML=h;
   $$('[data-st]').forEach(function(el){el.innerHTML=stTxt(st(el.dataset.st))});
   $$('.stop').forEach(function(el){var v=st(el.dataset.go);el.className='stop s'+v;el.querySelector('.pin').textContent=v===2?'✓':PAGES.indexOf(el.dataset.go)});
