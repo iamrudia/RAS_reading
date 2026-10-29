@@ -2,11 +2,11 @@
    서버·데이터베이스 없음. 학급 설정은 링크(#c=…) 안에, 학생 기록은 학생 브라우저에만 저장된다. */
 (function(g){
 'use strict';
-var R={VERSION:'1.1',NAME:'북로드',SUB:'한 권의 길을 걷는 독서기록장'};
+var R={VERSION:'1.2',NAME:'북로드',SUB:'한 권의 길을 걷는 독서기록장'};
 
 /* 학급 설정 기본값 */
 R.DEF={v:1,id:'',school:'',cls:'',title:'북로드',days:40,start:'',checks:[10,20,30],
-  elib:'https://lib.goe.go.kr/elib/index.do',upload:'',uploadLabel:'제출 폴더',mode:'free',acts:[],count:1};
+  elib:'https://lib.goe.go.kr/elib/index.do',upload:'',uploadLabel:'제출 폴더',agent:'',agentLabel:'AI 독후활동 코치',mode:'free',acts:[],count:1};
 R.full=function(c){var o={};for(var k in R.DEF)o[k]=R.DEF[k];if(c)for(var j in c)if(c[j]!=null)o[j]=c[j];return o};
 
 /* ───────── 독후활동 ─────────
@@ -130,6 +130,24 @@ R.summary=function(S,c){var logs=arr(S,'logs'),s=R.startDate(S,c),D=R.days(c),da
   return {start:s,logs:logs.length,logDays:Object.keys(dates).length,pct:pct,quotes:arr(S,'quotes').length,qs:arr(S,'qs').length,
     actDone:ch.filter(function(a){return R.actState(S,a)===2}).length,actNeed:R.actNeed(S,c),actNames:ch.map(function(a){return a.name}),
     pre:R.st.pre(S,c),during:R.st.during(S,c),post:R.st.post(S,c),act:R.st.act(S,c),fin:R.st.fin(S,c),star:+(g_(S,'fin.star')||0)}};
+
+/* ───────── AI 독후활동 코치 ─────────
+   북로드는 AI를 직접 부르지 않는다. 선생님이 만든 AI 에이전트 링크(cfg.agent)를 열고,
+   학생이 북로드가 만든 요청문을 복사해 붙여 넣는다. 이름 같은 개인정보는 요청문에 넣지 않는다. */
+R.AGENT_PROMPT="너는 '북로드 독후활동 코치'야. 중·고등학생이 책을 다 읽은 뒤, 자기에게 맞는 독후활동을 고르도록 돕는다.\n\n[지켜야 할 규칙]\n1. 독후활동 결과물(감상문, 편지, 서평, 만화 대본 등)을 대신 써 주지 않는다. 시작을 돕는 질문과 짜임(틀)까지만 준다.\n2. 책 내용을 아는 척하지 않는다. 줄거리·인물·결말은 학생이 알려 준 정보만 사용하고, 모르는 부분은 \"책에서 확인해 보세요\"라고 말한다.\n3. 학생의 이름·학교·연락처 같은 개인정보를 묻지 않는다.\n4. 학생이 보낸 '선생님이 정한 활동 목록'이 있으면 그 안에서만 추천한다. 없으면 아래 19가지 중에서 추천한다.\n5. 학년에 맞춘다. 중학생은 쉬운 말과 구체적인 예로, 고등학생은 관점·근거·사회적 맥락까지 생각하게 한다.\n6. 친근한 존댓말로, 한 번에 너무 길지 않게 답한다.\n\n[북로드 독후활동 19가지]\n쓰기: 친구에게 책 소개하기, 추천서 쓰기, 인물에게 편지 쓰기(소설), 작가에게 엽서 쓰기, 뒷이야기 쓰기(소설), 서평 쓰기, 독서감상문\n생각 정리: 인물 탐구하기(소설), 인물꽃 만들기(소설), 마인드맵, 질문과 대답 만들기, 자료 찾아 정리하기, 내 삶에 적용하기(비문학), 토론 준비하기\n표현: 4컷 만화, 그림으로 표현하기, 책 광고 만들기, 퀴즈 만들기, 가상 인터뷰\n(소설) 표시 활동은 소설에만, (비문학) 표시 활동은 비문학에만 추천한다.\n\n[대화 순서]\n1단계: 학생 정보를 확인한다. 꼭 필요한 정보가 빠졌으면 질문을 2개까지만 한다.\n2단계: 독후활동 3가지를 아래 형식으로 추천한다.\n  ① 활동 이름 — 이 학생에게 맞는 이유(학생이 쓴 느낌·구절·좋아하는 방식과 연결해 1~2문장)\n     · 첫걸음 질문: 활동을 시작할 때 스스로 답해 볼 질문 1개\n  (②, ③도 같은 형식)\n  마지막 줄: \"추천은 참고일 뿐이에요. 따를지, 바꿀지 스스로 정하고 그 이유를 북로드에 적어 보세요.\"\n3단계: 학생이 하나를 고르면, 그 활동의 짜임(3~4단계)과 생각을 여는 질문 3개를 준다. 문장을 대신 완성해 주지 않는다.\n학생이 대신 써 달라고 하면 정중히 거절하고, 대신 질문으로 도와준다.";
+R.STYLES=['그리기','글쓰기','말하기·토론','정리하기','상상하기','조사하기','만들기·꾸미기'];
+R.coachPrompt=function(S,c){var p=S.profile||{},b=S.book||{},po=S.post||{},g=R.genre(S),st=R.arr(S,'coach.styles');
+  var feel=String(po.feel||'').replace(/\s+/g,' ').trim();if(feel.length>220)feel=feel.slice(0,220)+'…';
+  var q=String(po.best||((R.arr(S,'quotes')[0]||{}).text)||'').replace(/\s+/g,' ').trim();if(q.length>120)q=q.slice(0,120)+'…';
+  var m=R.mode(c),av=R.actAvail(S,c).map(function(a){return a.name}),need=R.actNeed(S,c);
+  return ['[북로드 독후활동 추천 요청]',
+   '- 학년: '+(R.gradeLabel(p.grade)||'(미입력)')+' / 책의 갈래: '+(g==='fic'?'소설':g==='non'?'비문학':'(미입력)'),
+   '- 책: 「'+(b.title||'제목 미입력')+'」'+(b.author?' ('+b.author+')':''),
+   '- 읽은 후 나의 느낌: '+(feel||'(아직 쓰지 않음)'),
+   '- 기억에 남는 구절: '+(q||'(없음)'),
+   '- 내가 좋아하는 표현 방식: '+(st.length?st.join(', '):'(고르지 않음)'),
+   '- 선생님이 정한 활동 목록: '+(m==='free'?'없음 (19가지 중에서 추천)':av.join(', ')+(m==='fixed'?' (모두 해야 함 — 어떤 순서·방법으로 하면 좋을지 알려 주세요)':' (이 중에서 '+need+'개 이상)')),
+   m==='fixed'?'위 정보로 내가 해야 할 활동을 나에게 맞게 시작하는 방법을 알려 주세요.':'위 정보로 나에게 맞는 독후활동 3가지를 추천해 주세요.'].join('\n')};
 
 g.R40=R;
 })(window);

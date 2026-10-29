@@ -117,6 +117,17 @@ input.bad{border-color:#c0392b;background:#fff5f4}
     <p class="hint">소설 전용·비문학 전용 활동은 학생이 고른 책의 갈래에 맞을 때만 보여요.</p>
   </div>
 
+  <div class="card">
+    <h2>4. AI 독후활동 코치 <span class="hint" style="font-weight:400">(선택)</span></h2>
+    <p class="hint" style="margin-top:0">선생님이 쓰는 AI 도구(ChatGPT GPTs, Gemini Gem, Copilot 에이전트 등)에 아래 <b>지시문</b>을 넣어 에이전트를 만들고, 그 <b>공유 링크</b>를 넣으세요. 학생은 ④ 독후활동 탭에서 자기 정보로 만든 요청문을 복사해 이 코치에게 물어봐요. 북로드는 AI에 아무것도 직접 보내지 않아요.</p>
+    <label class="f">AI 코치 링크</label><input type="url" id="agent" placeholder="https://… (에이전트 공유 링크)">
+    <label class="f">버튼 이름</label><input type="text" id="agentLabel" placeholder="AI 독후활동 코치">
+    <label class="f">에이전트 지시문 <span class="hint" style="font-weight:400">— 에이전트를 만들 때 ‘지침(Instructions)’ 칸에 붙여 넣으세요</span></label>
+    <textarea id="agentPrompt" readonly style="min-height:150px;font-size:13px"></textarea>
+    <div class="btns"><button class="btn ghost sm" id="copyAgent">📋 지시문 복사</button></div>
+    <p class="hint">대부분의 AI 서비스는 이용 나이 제한이 있어요(만 14세 미만은 보호자 동의가 필요한 경우가 많아요). 학생이 직접 쓰기 어려우면 선생님 화면에서 함께 쓰세요. 에이전트를 만들 수 없는 도구라면 지시문과 학생 요청문을 한 메시지로 이어 보내도 돼요.</p>
+  </div>
+
   <div class="btns" style="margin:0 0 18px"><button class="btn teal" id="make" style="font-size:17px;padding:12px 22px">🔗 우리 반 링크 만들기</button><button class="btn ghost" id="newClass">＋ 새 학급으로 시작</button></div>
 
   <div class="card" id="outCard" style="display:none;border:2px solid var(--teal)">
@@ -151,7 +162,7 @@ input.bad{border-color:#c0392b;background:#fff5f4}
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="core.js?v=1.1"></script>
+<script src="core.js?v=1.2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function(){
@@ -167,11 +178,11 @@ function mode(){var r=$$('input[name=mode]').filter(function(x){return x.checked
 
 function fill(c){c=R.full(c);ID=c.id||R.uid(6);$('#cid').textContent=ID;
   $('#school').value=c.school||'';$('#cls').value=c.cls||'';$('#title').value=c.title===R.DEF.title?'':c.title;$('#start').value=c.start||'';$('#days').value=c.days||40;
-  $('#checks').value=(c.checks||[]).join(', ');$('#elib').value=c.elib||R.DEF.elib;$('#upload').value=c.upload||'';$('#uploadLabel').value=c.uploadLabel===R.DEF.uploadLabel?'':c.uploadLabel;
+  $('#checks').value=(c.checks||[]).join(', ');$('#elib').value=c.elib||R.DEF.elib;$('#upload').value=c.upload||'';$('#uploadLabel').value=c.uploadLabel===R.DEF.uploadLabel?'':c.uploadLabel;$('#agent').value=c.agent||'';$('#agentLabel').value=c.agentLabel===R.DEF.agentLabel?'':c.agentLabel;
   $$('input[name=mode]').forEach(function(r){r.checked=r.value===(c.mode||'free')});$('#count').value=c.count||1;renderActs(c.acts||[]);syncMode()}
 function read(){var c={v:1,id:ID,school:$('#school').value.trim(),cls:$('#cls').value.trim(),title:$('#title').value.trim()||R.DEF.title,start:R.parseDate($('#start').value),
    days:Math.max(7,Math.min(120,+$('#days').value||40)),checks:$('#checks').value.split(/[,\s]+/).map(Number).filter(function(n){return n>0}),
-   elib:$('#elib').value.trim()||R.DEF.elib,upload:$('#upload').value.trim(),uploadLabel:$('#uploadLabel').value.trim()||R.DEF.uploadLabel,
+   elib:$('#elib').value.trim()||R.DEF.elib,upload:$('#upload').value.trim(),uploadLabel:$('#uploadLabel').value.trim()||R.DEF.uploadLabel,agent:$('#agent').value.trim(),agentLabel:$('#agentLabel').value.trim()||R.DEF.agentLabel,
    mode:mode(),acts:$$('#acts input:checked').map(function(x){return x.value}),count:Math.max(1,+$('#count').value||1)};
   return c}
 /* 기본값과 같은 항목은 빼서 링크를 짧게 */
@@ -180,6 +191,7 @@ function compact(c){var o={};for(var k in c){var v=c[k],d=R.DEF[k];if(k==='v'||k
 function make(){var c=read();
   if(c.mode!=='free'&&!c.acts.length){toast('목록 선택·교사 지정은 활동을 하나 이상 체크해 주세요');return}
   if(c.mode==='pick'&&c.count>c.acts.length){toast('해야 할 활동 수가 목록보다 많아요');return}
+  if(c.agent&&!/^https?:\/\//.test(c.agent)){toast('AI 코치 링크는 https:// 로 시작해야 해요');return}
   if($('#start').value.trim()&&!c.start){toast('시작일을 숫자 8자리로 써 주세요 (예: 20261012)');return}
   if(c.upload&&!/^https?:\/\//.test(c.upload)){toast('제출 링크는 https:// 로 시작해야 해요');return}
   LINK=base()+'#c='+R.encodeCfg(compact(c));
@@ -199,7 +211,8 @@ function renderRecent(){var l=recent();$('#recent').innerHTML=l.length?'<table c
 function loadFrom(url){var d=R.cfgFromUrl(url);if(!d||!d.cfg.id){toast('독서기록장 링크가 아니에요');return false}fill(d.cfg);toast('설정을 불러왔어요. 고친 뒤 ‘링크 만들기’를 누르세요');return true}
 
 document.addEventListener('DOMContentLoaded',function(){
-  R.dateField($('#start'));fill(null);renderRecent();
+  R.dateField($('#start'));fill(null);renderRecent();$('#agentPrompt').value=R.AGENT_PROMPT;
+  $('#copyAgent').addEventListener('click',function(){var t=$('#agentPrompt');(navigator.clipboard?navigator.clipboard.writeText(R.AGENT_PROMPT):Promise.reject()).then(function(){toast('지시문을 복사했어요')},function(){t.select();try{document.execCommand('copy');toast('지시문을 복사했어요')}catch(e){}})});
   $$('input[name=mode]').forEach(function(r){r.addEventListener('change',syncMode)});
   $('#make').addEventListener('click',make);
   $('#newClass').addEventListener('click',function(){if(confirm('새 학급 코드로 처음부터 시작할까요? (새 링크의 학생 기록은 기존 링크와 따로 저장돼요)')){fill(null);$('#outCard').style.display='none'}});

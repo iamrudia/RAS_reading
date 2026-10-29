@@ -181,6 +181,8 @@ table.t td.c{text-align:center;white-space:nowrap}
 .drop{border:2px dashed var(--line);border-radius:12px;min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;text-align:center;padding:8px;background:#fff;cursor:pointer;overflow:hidden;position:relative}
 .drop img{max-width:100%;max-height:280px;border-radius:8px}
 .drop .x{position:absolute;top:4px;right:4px;background:#fff;border-radius:50%}
+.prompt{white-space:pre-wrap;font-family:var(--sans);font-size:13.5px;background:#1f1c2e;color:#f3f0ff;border-radius:12px;padding:12px 14px;margin:0;line-height:1.55}
+.coach{border-top:4px solid #7a6ff0}
 .mm svg{width:100%;max-width:620px;display:block;margin:8px auto 0;background:#fff;border:1px solid var(--line);border-radius:12px}
 
 .check{display:grid;gap:6px}
@@ -405,6 +407,27 @@ table.t td.c{text-align:center;white-space:nowrap}
 <section class="page" id="p-act">
   <h2>④ 독후활동</h2>
   <p class="lead" id="actLead"></p>
+  <div class="card noprint coach">
+    <h3>🤖 AI 독후활동 코치에게 물어보기 <span class="pill t">AI 이해·활용</span></h3>
+    <p class="hint" style="margin-top:-2px">내 정보로 요청문을 만들어 AI 코치에게 추천을 받아요. 추천은 참고일 뿐, <b>고르는 사람은 나</b>예요. 이름 같은 개인정보는 요청문에 들어가지 않아요.</p>
+    <div class="grid2">
+      <div>
+        <label class="f">① 내가 좋아하는 표현 방식 (여러 개)</label>
+        <div class="chips" id="styleChips"></div>
+        <label class="f">② 요청문 <span class="hint" style="font-weight:400">— ③ 읽은 후의 느낌·구절이 자동으로 들어가요</span></label>
+        <pre class="prompt" id="coachPrompt"></pre>
+        <div class="btns"><button class="btn teal sm" id="copyCoach">📋 요청문 복사</button><a class="btn sm" id="agentLink" target="_blank" rel="noopener">🤖 AI 코치 열기 ↗</a></div>
+        <p class="hint" id="agentHint"></p>
+      </div>
+      <div>
+        <label class="f">③ AI 코치의 추천 (붙여 넣기)</label><textarea data-k="coach.reply" style="min-height:140px" placeholder="AI 코치가 추천한 활동을 복사해 붙여 넣어요"></textarea>
+        <label class="f">④ 추천을 따져 보고 결정하기</label>
+        <p class="hint" style="margin:0 0 6px">✔ 내 느낌·구절과 이어지나요? ✔ 책 내용을 지어내지는 않았나요? ✔ 나에게 정말 맞나요?</p>
+        <select data-k="coach.decision"><option value="">선택</option><option value="따름">추천을 따랐어요</option><option value="일부">일부만 따랐어요</option><option value="바꿈">추천과 다르게 골랐어요</option></select>
+        <label class="f">그렇게 정한 이유</label><textarea data-k="coach.why" placeholder="예: AI는 4컷 만화를 추천했지만, 나는 주인공에게 하고 싶은 말이 많아서 편지 쓰기를 골랐다."></textarea>
+      </div>
+    </div>
+  </div>
   <div class="card noprint"><div id="actMenu"></div></div>
   <div id="actForms"></div>
 </section>
@@ -456,7 +479,7 @@ table.t td.c{text-align:center;white-space:nowrap}
 <div class="toast" id="toast"></div>
 <div class="stampfx" id="stampFx" aria-live="polite"><img src="stamp.webp" alt="오늘의 독서 완료 도장"><p id="stampTxt"></p></div>
 
-<script src="core.js?v=1.1"></script>
+<script src="core.js?v=1.2"></script>
 <script>
 (function(){
 'use strict';
@@ -583,7 +606,13 @@ function actChosen(){return R.actChosen(S,CFG)}
 function actNeed(){return R.actNeed(S,CFG)}
 function actState(a){return R.actState(S,a)}
 function aval(a,k){return R.aval(S,a,k)}
-function renderAct(){
+function renderCoach(){var on=arr('coach.styles');
+  $('#styleChips').innerHTML=R.STYLES.map(function(w){return '<button class="chip'+(on.indexOf(w)>=0?' on':'')+'" data-style="'+esc(w)+'">'+esc(w)+'</button>'}).join('');
+  $('#coachPrompt').textContent=R.coachPrompt(S,CFG);
+  var a=$('#agentLink');a.innerHTML='🤖 '+esc(CFG.agentLabel||'AI 독후활동 코치')+' 열기 ↗';
+  if(CFG.agent){a.href=CFG.agent;a.style.opacity='';a.style.pointerEvents='';$('#agentHint').textContent='열린 AI 코치 창에 요청문을 붙여 넣어 보내세요.'}
+  else{a.removeAttribute('href');a.style.opacity='.4';a.style.pointerEvents='none';$('#agentHint').textContent='선생님이 아직 AI 코치를 연결하지 않았어요. 복사한 요청문은 선생님이 안내한 AI에 붙여 넣으세요.'}}
+function renderAct(){renderCoach();
   var m=mode(),av=R.actAvail(S,CFG),ch=actChosen(),need=actNeed(),g=genre();
   var lead=m==='fixed'?'선생님이 정한 활동 <b>'+need+'개</b>를 모두 완성해요.':(m==='pick'?'선생님이 고른 활동 가운데':'아래 활동 가운데')+' <b>'+need+'개 이상</b> 골라 완성해요. 더 해도 좋아요!';
   if(!g)lead+=' <span class="pill r">‘내 책’에서 갈래를 고르면 책에 맞는 활동만 보여요</span>';
@@ -677,7 +706,7 @@ function sheetHTML(){var p=get('profile')||{},b=get('book')||{},pre=get('pre')||
    '<h3>③ 읽은 후</h3>'+(g==='non'?qa('주제',po.theme)+qa('중요한 내용 ①',po.key1)+qa('중요한 내용 ②',po.key2)+qa('중요한 내용 ③',po.key3):qa('줄거리',po.summary))+
    qa('읽은 후 느낌',po.feel)+qa('감명 깊은 부분',po.best)+qa('그 까닭',po.bestWhy)+qa('함께 나눌 질문',po.share)+qa('그 질문에 대한 내 생각',po.shareMine)+
    ((filled(po.deep1)||filled(po.deep2))?qa('작가의 관점 평가',po.deep1)+qa('다른 것과 견주기',po.deep2):'')+
-   '<h3>④ 독후활동</h3>'+(actChosen().length?actChosen().map(actSheet).join(''):'<span class="blank">(고른 활동 없음)</span>')+
+   '<h3>④ 독후활동</h3>'+((filled(get('coach.reply'))||filled(get('coach.why')))?'<h4>🤖 AI 독후활동 코치 활용</h4>'+qa('AI 코치의 추천',get('coach.reply'))+qa('나의 결정',{'따름':'추천을 따름','일부':'일부만 따름','바꿈':'추천과 다르게 고름'}[get('coach.decision')]||'')+qa('그 이유',get('coach.why')):'')+(actChosen().length?actChosen().map(actSheet).join(''):'<span class="blank">(고른 활동 없음)</span>')+
    '<h3>⑤ 마무리</h3>'+qa('독서 소감',fn.reflect)+qa('다음에 읽고 싶은 책',fn.next)+
    '<table class="t" style="margin-top:8px"><tr><th style="width:120px">자기평가</th><th>나의 판단</th></tr>'+RUB.map(function(r,i){return '<tr><td>'+r[0]+'</td><td>'+(sv[i]?['','잘함','보통','노력 필요'][sv[i]]+' – '+r[sv[i]]:'<span class="blank">(미선택)</span>')+'</td></tr>'}).join('')+'</table>'+
    '<p class="hint" style="margin-top:16px">저장한 때: '+new Date().toLocaleString('ko-KR')+(dayNo()>=1?' ('+dayNo()+'일째)':'')+(LINKED&&!CFG_OK?' · ⚠ 링크 변경됨':'')+'</p>';
@@ -730,6 +759,8 @@ document.addEventListener('DOMContentLoaded',function(){
   F.addEventListener('click',function(e){var c=e.target.closest('[data-achip]');if(c){var a=R.actById(c.dataset.achip),v=(aval(a,c.dataset.f)||[]).slice(),i=v.indexOf(c.dataset.o);i>=0?v.splice(i,1):v.push(c.dataset.o);actSet(a.id,c.dataset.f,v);c.classList.toggle('on');refreshActState(a.id);return}
     var r=e.target.closest('[data-rmimg]');if(r){e.preventDefault();actSet(r.dataset.rmimg,r.dataset.f,'');renderAct()}});
   F.addEventListener('change',function(e){var el=e.target;if(!el.dataset.aimg||!el.files[0])return;shrink(el.files[0],function(url){actSet(el.dataset.aimg,el.dataset.f,url);renderAct()})});
+  $('#styleChips').addEventListener('click',function(e){var b=e.target.closest('[data-style]');if(!b)return;var a=arr('coach.styles').slice(),i=a.indexOf(b.dataset.style);i>=0?a.splice(i,1):a.push(b.dataset.style);set('coach.styles',a);renderCoach()});
+  $('#copyCoach').addEventListener('click',function(){var t=R.coachPrompt(S,CFG);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){toast('요청문을 복사했어요. AI 코치에게 붙여 넣으세요')},function(){var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('요청문을 복사했어요')}catch(x){}ta.remove()})});
   $('#stars').addEventListener('click',function(e){var s=e.target.closest('[data-star]');if(!s)return;set('fin.star',+s.dataset.star);renderStars();renderCheck();renderDots()});
   $('#rub').addEventListener('change',function(e){var x=e.target;if(x.name&&x.name.indexOf('rb')===0){var s=Object.assign({},get('self')||{});s[x.name.slice(2)]=x.value;set('self',s);renderCheck();renderDots()}});
   $('#p-fin').addEventListener('input',function(){clearTimeout(this._t);this._t=setTimeout(function(){renderSheet();renderCheck()},400)});
