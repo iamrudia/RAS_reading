@@ -569,7 +569,7 @@ function renderBanners(){var h='';
 function renderHeader(){var t=CFG.title||R.NAME;document.title=t===R.NAME?R.NAME+' – '+R.SUB:t+' · '+R.NAME;$('#brandTitle').textContent=t;
   var sub=[CFG.school,CFG.cls].filter(Boolean).join(' · ');$('#brandSub').textContent=sub||(LINKED?R.SUB:'체험 모드 · '+R.SUB);
   $('#classPill').textContent=sub||'체험 모드';$('#elibLink').href=CFG.elib||R.DEF.elib;$('#ver').textContent='v'+R.VERSION;
-  $('#flowTitle').textContent='나의 지혜의 숲길 ('+days()+'일)'}
+  $('#flowTitle').textContent='나의 지혜의 숲길'}
 function renderHome(){
   var s=startDate(),D=days(),t=today(),n=diff(s,t)+1,sm=R.summary(S,CFG),dates={},cps=(CFG.checks||[]).map(Number);
   arr('logs').forEach(function(l){dates[l.date]=1});
