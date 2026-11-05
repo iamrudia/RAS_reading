@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="북로드(Book ROAD) – 한 권의 길을 걷는 독서기록장. 경기도 중·고등학생을 위한 자율 독서 웹 기록장. 서버에 아무것도 저장하지 않아요.">
+<meta name="description" content="북로드(Book ROAD) – 책에서 만나는 지혜의 숲길. 경기도 중·고등학생을 위한 자율 독서 웹 기록장. 서버에 아무것도 저장하지 않아요.">
 <meta name="theme-color" content="#3b34a8">
 <link rel="icon" href="stamp.webp">
-<title>북로드 – 한 권의 길을 걷는 독서기록장</title>
+<title>북로드 – 책에서 만나는 지혜의 숲길</title>
 <style>
 :root{
   --paper:#f6f3ec; --card:#fffdf9; --ink:#1f1c2e; --muted:#6a6578; --line:#e3ddd0;
@@ -127,10 +127,18 @@ body.g-fic [data-genre=non], body.g-non [data-genre=fic]{display:none!important}
 .today{margin:14px 0 0;padding:12px 14px;border-radius:14px;background:var(--teal-l);font-size:15px;display:flex;gap:10px;align-items:center}
 .today img{width:46px;height:46px;transform:rotate(-8deg);flex:none}
 .today.no{background:var(--gold-l)}
-.cal{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:10px}
-@media (max-width:900px){.cal{grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}}
-@media (max-width:640px){.cal{grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}}
-.cal .d{aspect-ratio:1;border-radius:16px;background:#fff;border:1.5px dashed #d9d3e8;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:var(--muted);line-height:1.2;position:relative}
+.calNav{display:flex;align-items:center;justify-content:center;gap:14px;margin:0 0 12px}
+.calNav b{font-family:var(--serif);font-size:22px;min-width:170px;text-align:center}
+.calNav button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:16px;cursor:pointer;color:var(--teal-d)}
+.calNav button:hover:not(:disabled){background:var(--teal-l)}
+.calNav button:disabled{opacity:.3;cursor:default}
+.calWeek{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.calWeek span:first-child{color:var(--red)} .calWeek span:last-child{color:var(--navy)}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+@media (max-width:640px){.cal,.calWeek{gap:4px}.cal .d b{font-size:16px!important}.cal .d .md{font-size:9px}}
+.cal .blank{visibility:hidden}
+.cal .d.off{border:1px solid transparent;background:transparent;opacity:.35}
+.cal .d{aspect-ratio:4/3;border-radius:16px;background:#fff;border:1.5px dashed #d9d3e8;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:var(--muted);line-height:1.2;position:relative}
 .cal .d b{font-size:22px;color:var(--ink);font-family:var(--serif)}
 .cal .d.done{background:#fff;border:1.5px solid #cfcaf0}
 .cal .d.done b{position:absolute;top:5px;left:7px;z-index:1;font-size:12px;font-family:var(--sans);background:rgba(255,255,255,.9);border-radius:6px;padding:0 5px;color:var(--teal-d)}
@@ -253,6 +261,8 @@ table.t td.c{text-align:center;white-space:nowrap}
 
   <div class="card board">
     <div class="boardHead"><h3>📮 나의 독서 도장판</h3><span class="hint" id="calInfo"></span></div>
+    <div class="calNav"><button id="calPrev" aria-label="이전 달">◀</button><b id="calMonth"></b><button id="calNext" aria-label="다음 달">▶</button></div>
+    <div class="calWeek"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
     <div class="cal" id="cal"></div>
   </div>
 
@@ -315,6 +325,7 @@ table.t td.c{text-align:center;white-space:nowrap}
     <h3>읽기 계획</h3>
     <div class="grid3">
       <div><label class="f">읽기 시작한 날</label><input type="text" class="dt" data-k="book.start"><span class="hint" id="startHint"></span></div>
+      <div><label class="f">다 읽을 날 (끝나는 날)</label><input type="text" class="dt" data-k="book.end"><span class="hint" id="endHint"></span></div>
       <div><label class="f">책의 분량 (장 수 또는 쪽 수)</label><input type="text" data-k="pre.size" placeholder="예: 12장 / 240쪽"></div>
       <div><label class="f">하루 목표</label><input type="text" data-k="pre.daily" placeholder="예: 하루 1장, 20분"></div>
     </div>
@@ -474,12 +485,12 @@ table.t td.c{text-align:center;white-space:nowrap}
 </section>
 </main>
 <footer>
-  <b>북로드</b> · 한 권의 길을 걷는 독서기록장 · 서버에 아무것도 저장하지 않아요 · <a href="guide.html" target="_blank">사용 안내·개인정보</a> · <a href="teacher.html" target="_blank">선생님용 페이지</a> · <span id="ver"></span><br>만든 사람: 광탄중학교 기술교사 강은영 · <a href="guide.html#m" target="_blank">문의</a>
+  <b>북로드</b> · 책에서 만나는 지혜의 숲길 · 서버에 아무것도 저장하지 않아요 · <a href="guide.html" target="_blank">사용 안내·개인정보</a> · <a href="teacher.html" target="_blank">선생님용 페이지</a> · <span id="ver"></span><br>만든 사람: 광탄중학교 기술교사 강은영 · <a href="guide.html#m" target="_blank">문의</a>
 </footer>
 <div class="toast" id="toast"></div>
 <div class="stampfx" id="stampFx" aria-live="polite"><img src="stamp.webp" alt="오늘의 독서 완료 도장"><p id="stampTxt"></p></div>
 
-<script src="core.js?v=1.2"></script>
+<script src="core.js?v=1.3"></script>
 <script>
 (function(){
 'use strict';
@@ -503,7 +514,8 @@ function br(s){return esc(s).replace(/\n/g,'<br>')}
 function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on')},2400)}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function startDate(){return R.startDate(S,CFG)}
-function days(){return R.days(CFG)}
+function days(){return R.span(S,CFG)}
+function endDate(){return R.endDate(S,CFG)}
 function genre(){return R.genre(S)}
 function grade(){return +(get('profile.grade')||0)}
 
@@ -524,10 +536,16 @@ function show(p){if(PAGES.indexOf(p)<0)p='home';
 function bind(){
   $$('[data-k]').forEach(function(el){var k=el.dataset.k,v=get(k);
     if(v!=null)el.value=v;
-    if(el.classList.contains('dt')){R.dateField(el,function(iso,raw){if(iso||!R.digits8(raw)){if((get(k)||'')!==iso){set(k,iso);after(k)}}});return}
+    if(el.classList.contains('dt')){R.dateField(el,function(iso,raw){if(!(iso||!R.digits8(raw)))return;var msg=dateRule(k,iso);
+        if(msg){el.classList.add('bad');toast(msg);return}if((get(k)||'')!==iso){set(k,iso);after(k)}},{min:k==='book.start'?today:startDate});return}
     el.addEventListener(el.tagName==='SELECT'||el.type==='date'?'change':'input',function(){set(k,el.value);after(k)})});
 }
-function after(k){if(k==='profile.grade')applyGrade();if(k==='book.start')renderHome();renderDots()}
+/* 날짜 규칙: 시작일은 정하는 날(오늘) 이후, 끝나는 날은 시작일 이후 */
+function dateRule(k,iso){if(!iso)return '';
+  if(k==='book.start'&&iso<today()&&iso!==get('book.start'))return '시작일은 오늘('+md(today())+')부터 고를 수 있어요';
+  if(k==='book.end'&&iso<startDate())return '끝나는 날은 시작일('+md(startDate())+') 이후로 골라요';
+  return ''}
+function after(k){if(k==='profile.grade')applyGrade();if(k==='book.start'||k==='book.end'){calYM=null;renderHeader();renderHome()}renderDots()}
 
 /* ───────── 진행 상태 ───────── */
 function st(p){return R.st[p](S,CFG)}
@@ -557,17 +575,51 @@ function renderHome(){
   $('#stDay').textContent=n<1?'D'+(n-1):n>D?'끝':n+'일';
   $('#stLogs').textContent=sm.logDays+'개';
   $('#stPct').textContent=sm.pct+'%';$('#pctBar').style.width=sm.pct+'%';
-  $('#calInfo').textContent=md(s)+' 시작 ~ '+md(addD(s,D-1))+' 끝 · 독서 일지를 저장한 날에 도장이 찍혀요'+(cps.length?' · 📌 중간 점검일':'');
+  $('#calInfo').textContent=R.fmtD(s)+' ~ '+R.fmtD(endDate())+' ('+D+'일) · 독서 일지를 저장한 날에 도장이 찍혀요'+(cps.length?' · 📌 중간 점검일':'');
   var nextCp=cps.filter(function(c){return c>=n}).sort(function(a,b){return a-b})[0];
   $('#todayBox').className='today'+(dates[t]?'':' no');
   $('#todayBox').innerHTML=dates[t]?'<img src="stamp.webp" alt=""><span><b>오늘의 도장을 받았어요!</b><br><span class="hint">내일도 한 쪽, 이어서 걸어가요.</span></span>'
     :'<span style="font-size:26px">📖</span><span><b>아직 오늘의 도장이 없어요.</b><br><span class="hint">'+(nextCp&&n>=1?'다음 중간 점검은 '+nextCp+'일째('+md(addD(s,nextCp-1))+')예요.':'조금이라도 읽고 기록하면 도장이 찍혀요.')+'</span></span>';
-  var h='';for(var i=0;i<D;i++){var d=addD(s,i),c='d'+(dates[d]?' done':'')+(d===t?' today':'')+(d>t?' future':'')+(cps.indexOf(i+1)>=0?' cp':'');
-    h+='<div class="'+c+'" title="'+(i+1)+'일째 · '+d+(dates[d]?' 독서 완료':'')+'"'+(dates[d]?' style="--r:'+((i*37)%25-12)+'deg"':'')+'><b>'+(i+1)+'</b><span class="md">'+md(d)+'</span></div>'}
-  $('#cal').innerHTML=h;
+  renderCal();
   $$('[data-st]').forEach(function(el){el.innerHTML=stTxt(st(el.dataset.st))});
   $$('.stop').forEach(function(el){var v=st(el.dataset.go);el.className='stop s'+v;el.querySelector('.pin').textContent=v===2?'✓':PAGES.indexOf(el.dataset.go)});
-  $('#startHint').textContent='숫자 8자리로 써요 (예: '+R.digits8(today())+'). '+(get('book.start')?'':(CFG.start?'비워 두면 선생님이 정한 '+CFG.start+'부터 셉니다.':'비워 두면 첫 기록 날짜부터 셉니다.'));
+  $('#startHint').textContent='오늘('+R.digits8(today())+') 이후로 골라요. '+(get('book.start')?'':(CFG.start?'비워 두면 선생님이 정한 '+R.fmtD(CFG.start)+'부터 셉니다.':'비워 두면 첫 기록(오늘)부터 셉니다.'));
+  $('#endHint').textContent=get('book.end')?'총 '+D+'일 동안 읽어요.':(CFG.end?'비워 두면 선생님이 정한 '+R.fmtD(CFG.end)+'까지예요.':'비워 두면 '+R.days(CFG)+'일 동안이에요 ('+R.fmtD(endDate())+'까지).');
+}
+/* 월별 도장판 (◀ ▶로 달 넘기기) */
+var calYM=null;
+function ymOf(iso){var d=R.pd(iso);return d.getFullYear()*12+d.getMonth()}
+function calDates(){var d={};arr('logs').forEach(function(l){d[l.date]=1});return d}
+function renderCal(){var s=startDate(),e=endDate(),t=today(),dates=calDates(),cps=(CFG.checks||[]).map(Number),lo=ymOf(s),hi=ymOf(e);
+  if(calYM==null)calYM=Math.min(hi,Math.max(lo,ymOf(t)));
+  calYM=Math.min(hi,Math.max(lo,calYM));
+  var y=Math.floor(calYM/12),m=calYM%12;$('#calMonth').textContent=y+'년 '+(m+1)+'월';
+  $('#calPrev').disabled=calYM<=lo;$('#calNext').disabled=calYM>=hi;
+  var off=new Date(y,m,1).getDay(),nd=new Date(y,m+1,0).getDate(),h='';
+  for(var i=0;i<off;i++)h+='<div class="d blank"></div>';
+  for(var dd=1;dd<=nd;dd++){var iso=R.iso(new Date(y,m,dd)),inR=iso>=s&&iso<=e,k=diff(s,iso)+1;
+    var c='d'+(inR?'':' off')+(inR&&dates[iso]?' done':'')+(iso===t?' today':'')+(inR&&iso>t?' future':'')+(inR&&cps.indexOf(k)>=0?' cp':'');
+    h+='<div class="'+c+'" title="'+iso+(inR?' · '+k+'일째':'')+(inR&&dates[iso]?' 독서 완료':'')+'"'+(inR&&dates[iso]?' style="--r:'+((k*37)%25-12)+'deg"':'')+'><b>'+dd+'</b><span class="md">'+(inR?k+'일째':'')+'</span></div>'}
+  $('#cal').innerHTML=h}
+/* 저장 파일용 도장판 그림 (기간 전체, 월별) */
+var stampImg=new Image();stampImg.src='stamp.webp';
+function boardPNG(){try{var s=startDate(),e=endDate(),dates=calDates(),lo=ymOf(s),hi=ymOf(e),n=hi-lo+1,cols=Math.min(3,n),rows=Math.ceil(n/cols);
+  var C=44,G=4,MW=7*C+6*G,MH=40+22+6*(C+G),PAD=24,W=PAD*2+cols*MW+(cols-1)*28,TOP=56,H=TOP+PAD+rows*MH+(rows-1)*20;
+  var cv=document.createElement('canvas');cv.width=W*2;cv.height=H*2;var x=cv.getContext('2d');x.scale(2,2);
+  x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle='#2b2588';x.font='bold 20px sans-serif';x.textAlign='left';
+  x.fillText('📮 나의 독서 도장판',PAD,34);x.fillStyle='#6a6578';x.font='14px sans-serif';x.textAlign='right';
+  x.fillText(R.fmtD(s)+' ~ '+R.fmtD(e)+' · 도장 '+R.summary(S,CFG).logDays+'개 / '+days()+'일',W-PAD,34);
+  for(var i=0;i<n;i++){var ym=lo+i,y=Math.floor(ym/12),m=ym%12,ox=PAD+(i%cols)*(MW+28),oy=TOP+Math.floor(i/cols)*(MH+20);
+    x.textAlign='center';x.fillStyle='#1f1c2e';x.font='bold 16px sans-serif';x.fillText(y+'년 '+(m+1)+'월',ox+MW/2,oy+20);
+    x.font='11px sans-serif';'일월화수목금토'.split('').forEach(function(w,j){x.fillStyle=j===0?'#c0392b':j===6?'#1f5f8b':'#6a6578';x.fillText(w,ox+j*(C+G)+C/2,oy+52)});
+    var off=new Date(y,m,1).getDay(),nd=new Date(y,m+1,0).getDate();
+    for(var d=1;d<=nd;d++){var iso=R.iso(new Date(y,m,d)),p=off+d-1,cx=ox+(p%7)*(C+G),cy=oy+62+Math.floor(p/7)*(C+G),inR=iso>=s&&iso<=e;
+      x.globalAlpha=inR?1:.3;x.strokeStyle=dates[iso]&&inR?'#cfcaf0':'#e3ddd0';x.lineWidth=1;x.beginPath();
+      if(x.roundRect)x.roundRect(cx,cy,C,C,8);else x.rect(cx,cy,C,C);x.stroke();
+      if(inR&&dates[iso]){if(stampImg.complete&&stampImg.naturalWidth){x.save();x.translate(cx+C/2,cy+C/2);x.rotate(((d*37)%25-12)*Math.PI/180);x.drawImage(stampImg,-C/2+2,-C/2+2,C-4,C-4);x.restore()}
+        else{x.fillStyle='#3b34a8';x.beginPath();x.arc(cx+C/2,cy+C/2,C/2-5,0,7);x.fill()}}
+      x.fillStyle=inR&&dates[iso]?'#2b2588':'#1f1c2e';x.font=(inR&&dates[iso]?'bold ':'')+'11px sans-serif';x.textAlign='left';x.fillText(d,cx+4,cy+13);x.globalAlpha=1}}
+  return cv.toDataURL('image/png')}catch(err){return ''}
 }
 
 /* ───────── 읽기 전 ───────── */
@@ -697,7 +749,7 @@ function sheetHTML(){var p=get('profile')||{},b=get('book')||{},pre=get('pre')||
   var h='<h2>📚 '+esc(CFG.title||R.NAME)+' <span style="font-size:14px;color:#6a6578;font-weight:400">'+esc(R.SUB)+'</span></h2>'+
    '<p>'+esc([CFG.school,CFG.cls].filter(Boolean).join(' · '))+' &nbsp; '+esc(R.gradeLabel(p.grade)||'_학년')+' '+esc(p.cls||'_')+'반 '+esc(p.num||'_')+'번 · 이름: <b>'+esc(p.name||'______')+'</b></p>'+
    '<table class="t"><tr><th style="width:110px">책 제목</th><td colspan="3"><b>'+esc(b.title||'')+'</b></td></tr><tr><th>지은이</th><td>'+esc(b.author||'')+'</td><th style="width:90px">출판사</th><td>'+esc(b.pub||'')+'</td></tr>'+
-   '<tr><th>갈래</th><td>'+(g==='fic'?'소설·이야기':g==='non'?'비문학':'')+'</td><th>독서 기간</th><td>'+s+' ~ '+(logs.length?logs[logs.length-1].date:'')+'</td></tr>'+
+   '<tr><th>갈래</th><td>'+(g==='fic'?'소설·이야기':g==='non'?'비문학':'')+'</td><th>독서 기간</th><td>'+R.fmtD(s)+' ~ '+R.fmtD(endDate())+' ('+days()+'일)</td></tr>'+
    '<tr><th>별점</th><td>'+(fn.star?'★★★★★'.slice(0,+fn.star)+'☆☆☆☆☆'.slice(0,5-fn.star):'')+'</td><th>한 줄 평</th><td>'+esc(fn.oneline||'')+'</td></tr></table>'+
    '<h3>① 읽기 전</h3>'+qa('고른 이유',arr('pre.chips').join(', ')+(pre.why?'\n'+pre.why:''))+qa('내용 예상',pre.predict)+qa('궁금한 점',pre.wonder)+qa('읽기 계획',[pre.size&&'분량: '+pre.size,pre.daily&&'하루 목표: '+pre.daily,pre.when&&'독서 약속: '+pre.when].filter(Boolean).join('\n'))+
    '<h3>② 읽는 중</h3><h4>독서 일지 ('+logs.length+'회)</h4>'+(logs.length?'<table class="t"><tr><th style="width:80px">날짜</th><th>어디까지</th><th style="width:50px">%</th><th>한 줄 메모</th><th style="width:40px"></th></tr>'+logs.map(function(l){return '<tr><td class="c">'+md(l.date)+'</td><td>'+esc(l.pos)+'</td><td class="c">'+(filled(l.pct)?esc(l.pct):'')+'</td><td>'+esc(l.memo)+'</td><td class="c">'+esc(l.mood)+'</td></tr>'}).join('')+'</table>':'<span class="blank">(기록 없음)</span>')+
@@ -709,10 +761,11 @@ function sheetHTML(){var p=get('profile')||{},b=get('book')||{},pre=get('pre')||
    '<h3>④ 독후활동</h3>'+((filled(get('coach.reply'))||filled(get('coach.why')))?'<h4>🤖 AI 독후활동 코치 활용</h4>'+qa('AI 코치의 추천',get('coach.reply'))+qa('나의 결정',{'따름':'추천을 따름','일부':'일부만 따름','바꿈':'추천과 다르게 고름'}[get('coach.decision')]||'')+qa('그 이유',get('coach.why')):'')+(actChosen().length?actChosen().map(actSheet).join(''):'<span class="blank">(고른 활동 없음)</span>')+
    '<h3>⑤ 마무리</h3>'+qa('독서 소감',fn.reflect)+qa('다음에 읽고 싶은 책',fn.next)+
    '<table class="t" style="margin-top:8px"><tr><th style="width:120px">자기평가</th><th>나의 판단</th></tr>'+RUB.map(function(r,i){return '<tr><td>'+r[0]+'</td><td>'+(sv[i]?['','잘함','보통','노력 필요'][sv[i]]+' – '+r[sv[i]]:'<span class="blank">(미선택)</span>')+'</td></tr>'}).join('')+'</table>'+
+   (function(){var b=boardPNG();return b?'<h3>📮 나의 독서 도장판</h3><img src="'+b+'" alt="나의 독서 도장판" style="max-width:100%;max-height:none;border:0;border-radius:0">':''})()+
    '<p class="hint" style="margin-top:16px">저장한 때: '+new Date().toLocaleString('ko-KR')+(dayNo()>=1?' ('+dayNo()+'일째)':'')+(LINKED&&!CFG_OK?' · ⚠ 링크 변경됨':'')+'</p>';
   return h}
 function renderSheet(){$('#sheet').innerHTML='<p class="hint noprint" style="margin-top:0">📄 내 기록장 미리보기</p>'+sheetHTML()}
-function fname(ext){var p=get('profile')||{};return ('북로드_'+(R.gradeLabel(p.grade)||'')+'-'+(p.cls||'')+'-'+(p.num||'')+'_'+(p.name||'이름')+'_'+today().slice(5).replace('-','')).replace(/[\\/:*?"<>|]/g,'')+ext}
+function fname(ext){var p=get('profile')||{};return ('북로드_책에서 만나는 지혜의 숲길_'+(R.gradeLabel(p.grade)||'')+'-'+(p.cls||'')+'-'+(p.num||'')+'_'+(p.name||'이름')+'_'+today().slice(5).replace('-','')).replace(/[\\/:*?"<>|]/g,'')+ext}
 function download(name,blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},800)}
 function saveFile(){set('meta.backup',today());renderSheet();var css=document.querySelector('style').textContent;
   var data=JSON.stringify({app:'r40',v:1,savedAt:new Date().toISOString(),day:dayNo(),cfg:CFG,cfgOk:CFG_OK,linked:LINKED,S:S}).replace(/</g,'\\u003c');
@@ -731,11 +784,17 @@ document.addEventListener('DOMContentLoaded',function(){
   document.addEventListener('click',function(e){var g=e.target.closest('[data-go]');if(g){e.preventDefault();show(g.dataset.go)}
     if(e.target.closest('#quickSave'))saveFile()});
   window.addEventListener('hashchange',function(){if(R.cfgFromUrl(location.href))location.reload()});
+  $('#calPrev').addEventListener('click',function(){calYM--;renderCal()});
+  $('#calNext').addEventListener('click',function(){calYM++;renderCal()});
   $('#genre').addEventListener('click',function(e){var b=e.target.closest('[data-g]');if(!b)return;set('book.genre',b.dataset.g);applyGenre();renderHome();renderDots()});
   $('#whyChips').addEventListener('click',function(e){var b=e.target.closest('[data-w]');if(!b)return;var a=arr('pre.chips').slice(),i=a.indexOf(b.dataset.w);i>=0?a.splice(i,1):a.push(b.dataset.w);set('pre.chips',a);renderWhy();renderDots()});
   $('#lgAdd').addEventListener('click',function(){var raw=$('#lgDate').value.trim(),d=raw?R.parseDate(raw):today(),pct=$('#lgPct').value;
     if(!d){toast('날짜를 숫자 8자리로 써 주세요 (예: '+R.digits8(today())+')');$('#lgDate').focus();return}
     if(d>today()){toast('아직 오지 않은 날짜예요. 날짜를 확인해 주세요');return}
+    if(!get('book.start')&&!CFG.start){if(d<today()){toast('첫 기록은 오늘 날짜로 시작해요');$('#lgDate').value=today();return}
+      set('book.start',today());var sf=$('[data-k="book.start"]');if(sf)sf.value=today();calYM=null}
+    if(d<startDate()){toast('시작일('+md(startDate())+') 이전 날짜에는 기록할 수 없어요');return}
+    if(d>endDate()){toast('독서 기간('+R.fmtD(endDate())+'까지)이 끝났어요. 기간을 늘리려면 ① 읽기 전에서 끝나는 날을 바꿔요');return}
     if(!$('#lgPos').value.trim()&&!$('#lgMemo').value.trim()&&!pct){toast('어디까지 읽었는지나 한 줄 메모를 적어 주세요');return}
     if(pct!=='')pct=Math.max(0,Math.min(100,Math.round(+pct)));
     var first=!arr('logs').some(function(l){return l.date===d});

@@ -85,8 +85,8 @@ input.bad{border-color:#c0392b;background:#fff5f4}
       <div><label class="f">프로젝트 이름</label><input type="text" id="title" placeholder="북로드 (예: 2학기 한 권 읽기)"></div>
     </div>
     <div class="grid3">
-      <div><label class="f">시작일 (숫자 8자리)</label><input type="text" id="start"><span class="hint">예: 20261012. 비우면 학생마다 첫 기록일부터 셉니다.</span></div>
-      <div><label class="f">기간 (일)</label><input type="number" id="days" min="7" max="120" value="40"></div>
+      <div><label class="f">시작일</label><input type="text" id="start"><span class="hint">오늘 이후 날짜 · 📅로 고르거나 숫자 8자리. 비우면 학생마다 첫 기록일(그날)부터 셉니다.</span></div>
+      <div><label class="f">끝나는 날</label><input type="text" id="end"><span class="hint" id="endHint">비우면 40일 동안이에요. 한 학기처럼 길게 정해도 돼요.</span></div>
       <div><label class="f">중간 점검일 (며칠째, 쉼표로)</label><input type="text" id="checks" placeholder="예: 10, 20, 30"><span class="hint">그날 학생 화면에 ‘제출하세요’ 알림이 떠요.</span></div>
     </div>
     <label class="f">전자도서관 링크</label><input type="url" id="elib">
@@ -162,7 +162,7 @@ input.bad{border-color:#c0392b;background:#fff5f4}
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="core.js?v=1.2"></script>
+<script src="core.js?v=1.3"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function(){
@@ -177,11 +177,15 @@ function syncMode(){var m=mode();$('#acts').classList.toggle('off',m==='free');$
 function mode(){var r=$$('input[name=mode]').filter(function(x){return x.checked})[0];return r?r.value:'free'}
 
 function fill(c){c=R.full(c);ID=c.id||R.uid(6);$('#cid').textContent=ID;
-  $('#school').value=c.school||'';$('#cls').value=c.cls||'';$('#title').value=c.title===R.DEF.title?'':c.title;$('#start').value=c.start||'';$('#days').value=c.days||40;
+  $('#school').value=c.school||'';$('#cls').value=c.cls||'';$('#title').value=c.title===R.DEF.title?'':c.title;$('#start').value=c.start||'';$('#end').value=c.end||'';LOADED_START=c.start||'';periodHint();
   $('#checks').value=(c.checks||[]).join(', ');$('#elib').value=c.elib||R.DEF.elib;$('#upload').value=c.upload||'';$('#uploadLabel').value=c.uploadLabel===R.DEF.uploadLabel?'':c.uploadLabel;$('#agent').value=c.agent||'';$('#agentLabel').value=c.agentLabel===R.DEF.agentLabel?'':c.agentLabel;
   $$('input[name=mode]').forEach(function(r){r.checked=r.value===(c.mode||'free')});$('#count').value=c.count||1;renderActs(c.acts||[]);syncMode()}
-function read(){var c={v:1,id:ID,school:$('#school').value.trim(),cls:$('#cls').value.trim(),title:$('#title').value.trim()||R.DEF.title,start:R.parseDate($('#start').value),
-   days:Math.max(7,Math.min(120,+$('#days').value||40)),checks:$('#checks').value.split(/[,\s]+/).map(Number).filter(function(n){return n>0}),
+var LOADED_START='';
+function periodDays(){var s=R.parseDate($('#start').value),e=R.parseDate($('#end').value);return s&&e&&e>=s?R.diff(s,e)+1:40}
+function periodHint(){var s=R.parseDate($('#start').value),e=R.parseDate($('#end').value);
+  $('#endHint').textContent=e?(s?(e>=s?'→ 총 '+(R.diff(s,e)+1)+'일':'시작일보다 앞서요'):'→ 학생마다 시작일부터 '+R.fmtD(e)+'까지'):'비우면 40일 동안이에요. 한 학기처럼 길게 정해도 돼요.'}
+function read(){var c={v:1,id:ID,school:$('#school').value.trim(),cls:$('#cls').value.trim(),title:$('#title').value.trim()||R.DEF.title,start:R.parseDate($('#start').value),end:R.parseDate($('#end').value),
+   days:periodDays(),checks:$('#checks').value.split(/[,\s]+/).map(Number).filter(function(n){return n>0}),
    elib:$('#elib').value.trim()||R.DEF.elib,upload:$('#upload').value.trim(),uploadLabel:$('#uploadLabel').value.trim()||R.DEF.uploadLabel,agent:$('#agent').value.trim(),agentLabel:$('#agentLabel').value.trim()||R.DEF.agentLabel,
    mode:mode(),acts:$$('#acts input:checked').map(function(x){return x.value}),count:Math.max(1,+$('#count').value||1)};
   return c}
@@ -193,6 +197,9 @@ function make(){var c=read();
   if(c.mode==='pick'&&c.count>c.acts.length){toast('해야 할 활동 수가 목록보다 많아요');return}
   if(c.agent&&!/^https?:\/\//.test(c.agent)){toast('AI 코치 링크는 https:// 로 시작해야 해요');return}
   if($('#start').value.trim()&&!c.start){toast('시작일을 숫자 8자리로 써 주세요 (예: 20261012)');return}
+  if($('#end').value.trim()&&!c.end){toast('끝나는 날을 숫자 8자리로 써 주세요');return}
+  if(c.start&&c.start<R.today()&&c.start!==LOADED_START){toast('시작일은 오늘 이후로 정해 주세요');return}
+  if(c.end&&c.end<(c.start||R.today())){toast('끝나는 날은 시작일 이후로 정해 주세요');return}
   if(c.upload&&!/^https?:\/\//.test(c.upload)){toast('제출 링크는 https:// 로 시작해야 해요');return}
   LINK=base()+'#c='+R.encodeCfg(compact(c));
   $('#link').value=LINK;$('#open').href=LINK;$('#outCard').style.display='';
@@ -211,7 +218,7 @@ function renderRecent(){var l=recent();$('#recent').innerHTML=l.length?'<table c
 function loadFrom(url){var d=R.cfgFromUrl(url);if(!d||!d.cfg.id){toast('독서기록장 링크가 아니에요');return false}fill(d.cfg);toast('설정을 불러왔어요. 고친 뒤 ‘링크 만들기’를 누르세요');return true}
 
 document.addEventListener('DOMContentLoaded',function(){
-  R.dateField($('#start'));fill(null);renderRecent();$('#agentPrompt').value=R.AGENT_PROMPT;
+  R.dateField($('#start'),periodHint,{min:R.today});R.dateField($('#end'),periodHint,{min:function(){return R.parseDate($('#start').value)||R.today()}});fill(null);renderRecent();$('#agentPrompt').value=R.AGENT_PROMPT;
   $('#copyAgent').addEventListener('click',function(){var t=$('#agentPrompt');(navigator.clipboard?navigator.clipboard.writeText(R.AGENT_PROMPT):Promise.reject()).then(function(){toast('지시문을 복사했어요')},function(){t.select();try{document.execCommand('copy');toast('지시문을 복사했어요')}catch(e){}})});
   $$('input[name=mode]').forEach(function(r){r.addEventListener('change',syncMode)});
   $('#make').addEventListener('click',make);

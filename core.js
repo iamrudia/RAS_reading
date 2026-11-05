@@ -2,10 +2,10 @@
    서버·데이터베이스 없음. 학급 설정은 링크(#c=…) 안에, 학생 기록은 학생 브라우저에만 저장된다. */
 (function(g){
 'use strict';
-var R={VERSION:'1.2',NAME:'북로드',SUB:'한 권의 길을 걷는 독서기록장'};
+var R={VERSION:'1.3',NAME:'북로드',SUB:'책에서 만나는 지혜의 숲길'};
 
 /* 학급 설정 기본값 */
-R.DEF={v:1,id:'',school:'',cls:'',title:'북로드',days:40,start:'',checks:[10,20,30],
+R.DEF={v:1,id:'',school:'',cls:'',title:'북로드',days:40,start:'',end:'',checks:[10,20,30],
   elib:'https://lib.goe.go.kr/elib/index.do',upload:'',uploadLabel:'제출 폴더',agent:'',agentLabel:'AI 독후활동 코치',mode:'free',acts:[],count:1};
 R.full=function(c){var o={};for(var k in R.DEF)o[k]=R.DEF[k];if(c)for(var j in c)if(c[j]!=null)o[j]=c[j];return o};
 
@@ -72,7 +72,7 @@ R.fmtDate=function(v){var d=R.digits8(v);return d.slice(0,4)+(d.length>4?'-'+d.s
 R.parseDate=function(v){var d=R.digits8(v);if(d.length!==8)return '';var y=+d.slice(0,4),m=+d.slice(4,6),dd=+d.slice(6),t=new Date(y,m-1,dd);
   if(y<2000||y>2100||t.getMonth()!==m-1||t.getDate()!==dd)return '';return R.iso(t)};
 /* 글자 입력칸을 날짜 칸으로: 숫자만 받고 자동으로 - 를 넣음, 📅 버튼으로 달력 선택 */
-R.dateField=function(el,onChange){
+R.dateField=function(el,onChange,opt){
   el.setAttribute('inputmode','numeric');el.setAttribute('maxlength','10');el.setAttribute('autocomplete','off');if(!el.placeholder)el.placeholder='예: '+R.digits8(R.today());
   var wrap=document.createElement('span');wrap.className='dtwrap';el.parentNode.insertBefore(wrap,el);wrap.appendChild(el);
   var b=document.createElement('button');b.type='button';b.className='dtbtn';b.title='달력에서 고르기';b.setAttribute('aria-label','달력에서 고르기');b.textContent='📅';
@@ -81,7 +81,7 @@ R.dateField=function(el,onChange){
   function upd(){var iso=R.parseDate(el.value),n=R.digits8(el.value).length;el.classList.toggle('bad',n===8&&!iso);if(onChange)onChange(iso,el.value)}
   el.addEventListener('input',function(){var f=R.fmtDate(el.value);if(f!==el.value)el.value=f;upd()});
   el.addEventListener('blur',function(){var iso=R.parseDate(el.value);if(iso)el.value=iso});
-  b.addEventListener('click',function(){p.value=R.parseDate(el.value)||R.today();try{p.showPicker()}catch(e){p.focus();p.click()}});
+  b.addEventListener('click',function(){var mn=opt&&opt.min;p.min=(typeof mn==='function'?mn():mn)||'2000-01-01';p.value=R.parseDate(el.value)||(p.min>R.today()?p.min:R.today());try{p.showPicker()}catch(e){p.focus();p.click()}});
   p.addEventListener('change',function(){if(!p.value)return;el.value=p.value;upd()});
 };
 R.uid=function(n){var c='abcdefghijkmnpqrstuvwxyz23456789',s='';for(var i=0;i<(n||6);i++)s+=c[Math.floor(Math.random()*c.length)];return s};
@@ -101,6 +101,10 @@ R.get=g_;R.arr=arr;
 R.genre=function(S){return g_(S,'book.genre')||''};
 R.startDate=function(S,c){var s=g_(S,'book.start');if(s)return s;if(c.start)return c.start;var l=arr(S,'logs').map(function(x){return x.date}).sort();return l[0]||R.today()};
 R.days=function(c){return Math.max(1,+c.days||40)};
+/* 기간: 시작일 ~ 끝나는 날(학생 > 선생님 > 시작일+기본 일수) */
+R.endDate=function(S,c){var s=R.startDate(S,c),e=g_(S,'book.end')||c.end;if(!e||e<s)e=R.addD(s,R.days(c)-1);return e};
+R.span=function(S,c){return R.diff(R.startDate(S,c),R.endDate(S,c))+1};
+R.fmtD=function(iso){var d=R.pd(iso);return d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()};
 R.mode=function(c){var m=c.mode||'free';if(m!=='free'&&!(c.acts||[]).length)m='free';return m};
 R.fitGenre=function(a,S){var g=R.genre(S);return !g||a.g==='both'||a.g===g};
 R.actAvail=function(S,c){var m=R.mode(c);return R.ACTS.filter(function(a){return R.fitGenre(a,S)&&(m==='free'||c.acts.indexOf(a.id)>=0)})};
@@ -123,11 +127,11 @@ R.st={
  act:function(S,c){var ch=R.actChosen(S,c);if(!ch.length)return 0;var d=ch.filter(function(a){return R.actState(S,a)===2}).length;return d>=R.actNeed(S,c)?2:1},
  fin:function(S){var star=g_(S,'fin.star'),one=filled(g_(S,'fin.oneline')),self=g_(S,'self')||{};return star&&one&&Object.keys(self).length===R.RUB.length?2:(star||one)?1:0}
 };
-R.summary=function(S,c){var logs=arr(S,'logs'),s=R.startDate(S,c),D=R.days(c),dates={};
+R.summary=function(S,c){var logs=arr(S,'logs'),s=R.startDate(S,c),D=R.span(S,c),dates={};
   logs.forEach(function(l){var k=R.diff(s,l.date);if(k>=0&&k<D)dates[l.date]=1});
   var pct=Math.min(100,Math.max.apply(null,[0].concat(logs.map(function(l){return +l.pct||0}))));
   var ch=R.actChosen(S,c);
-  return {start:s,logs:logs.length,logDays:Object.keys(dates).length,pct:pct,quotes:arr(S,'quotes').length,qs:arr(S,'qs').length,
+  return {start:s,end:R.endDate(S,c),span:D,logs:logs.length,logDays:Object.keys(dates).length,pct:pct,quotes:arr(S,'quotes').length,qs:arr(S,'qs').length,
     actDone:ch.filter(function(a){return R.actState(S,a)===2}).length,actNeed:R.actNeed(S,c),actNames:ch.map(function(a){return a.name}),
     pre:R.st.pre(S,c),during:R.st.during(S,c),post:R.st.post(S,c),act:R.st.act(S,c),fin:R.st.fin(S,c),star:+(g_(S,'fin.star')||0)}};
 
