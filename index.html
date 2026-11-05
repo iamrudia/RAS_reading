@@ -92,6 +92,7 @@ body.g-fic [data-genre=non], body.g-non [data-genre=fic]{display:none!important}
 .heroL > *{position:relative}
 .heroL h1{font-size:34px;margin:12px 0 12px;color:#fff;letter-spacing:-.5px}
 .heroL h1 em{font-style:normal;color:#ffd58a}
+.heroL h1 .heroBrand{display:block;font-size:20px;letter-spacing:.12em;color:#ffd58a;margin-bottom:6px}
 .heroL .lead{color:rgba(255,255,255,.88)}
 .heroL .hint{color:rgba(255,255,255,.72)} .heroL .hint b{color:#fff}
 .heroL .deco{position:absolute;right:-30px;bottom:-24px;width:300px;opacity:.16;pointer-events:none}
@@ -241,7 +242,7 @@ table.t td.c{text-align:center;white-space:nowrap}
     <div class="heroL">
       <svg class="deco" viewBox="0 0 300 220" aria-hidden="true"><path d="M-10 230 C 70 190, 30 120, 130 110 S 240 60, 320 -10" fill="none" stroke="#fff" stroke-width="34" stroke-linecap="round"/><path d="M-10 230 C 70 190, 30 120, 130 110 S 240 60, 320 -10" fill="none" stroke="#2b2588" stroke-width="3" stroke-dasharray="12 14"/></svg>
       <span class="eyebrow">📖 BOOK ROAD</span> <span class="pill" id="classPill"></span>
-      <h1 id="heroTitle">한 권의 책과 걷는<br><em>40일</em>의 길</h1>
+      <h1 id="heroTitle"><span class="heroBrand">북로드</span>책과 함께 걷는<br><em>지혜의 숲길</em></h1>
       <p class="lead">전자도서관에서 내가 읽고 싶은 책 한 권을 골라 끝까지 걸어가요. 읽기 전에 기대하고, 날마다 기록하며 도장을 모으고, 다 읽은 뒤에는 생각을 나누어요.</p>
       <div class="btns"><a class="btn light" id="elibLink" target="_blank" rel="noopener">📚 경기도교육청 전자도서관 열기 ↗</a></div>
       <p class="hint">전자책은 한 번 빌리면 대출 기간이 끝나요. 다 읽지 못했다면 <b>연장하거나 다시 빌려요.</b> 전자책은 쪽수가 기기마다 다르니 위치는 <b>‘장 제목’이나 ‘%’</b>로 적어요.</p>
@@ -568,7 +569,7 @@ function renderBanners(){var h='';
 function renderHeader(){var t=CFG.title||R.NAME;document.title=t===R.NAME?R.NAME+' – '+R.SUB:t+' · '+R.NAME;$('#brandTitle').textContent=t;
   var sub=[CFG.school,CFG.cls].filter(Boolean).join(' · ');$('#brandSub').textContent=sub||(LINKED?R.SUB:'체험 모드 · '+R.SUB);
   $('#classPill').textContent=sub||'체험 모드';$('#elibLink').href=CFG.elib||R.DEF.elib;$('#ver').textContent='v'+R.VERSION;
-  $('#flowTitle').textContent=days()+'일의 길';$('#heroTitle').innerHTML='한 권의 책과 걷는<br><em>'+days()+'일</em>의 길'}
+  $('#flowTitle').textContent=days()+'일의 길'}
 function renderHome(){
   var s=startDate(),D=days(),t=today(),n=diff(s,t)+1,sm=R.summary(S,CFG),dates={},cps=(CFG.checks||[]).map(Number);
   arr('logs').forEach(function(l){dates[l.date]=1});
