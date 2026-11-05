@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="북로드(Book ROAD) – 책에서 만나는 지혜의 숲길. 경기도 중·고등학생을 위한 자율 독서 웹 기록장. 서버에 아무것도 저장하지 않아요.">
+<meta name="description" content="북로드(Book ROAD) – 책과 함께 걷는 지혜의 숲길. 경기도 중·고등학생을 위한 자율 독서 웹 기록장. 서버에 아무것도 저장하지 않아요.">
 <meta name="theme-color" content="#3b34a8">
 <link rel="icon" href="stamp.webp">
-<title>북로드 – 책에서 만나는 지혜의 숲길</title>
+<title>북로드 – 책과 함께 걷는 지혜의 숲길</title>
 <style>
 :root{
   --paper:#f6f3ec; --card:#fffdf9; --ink:#1f1c2e; --muted:#6a6578; --line:#e3ddd0;
@@ -293,7 +293,7 @@ table.t td.c{text-align:center;white-space:nowrap}
     </div>
   </div>
 
-  <h3 style="margin-top:22px" id="flowTitle">40일의 길</h3>
+  <h3 style="margin-top:22px" id="flowTitle">나의 지혜의 숲길</h3>
   <div class="road">
     <a class="stop" href="#" data-go="pre"><span class="pin">1</span><div class="sc"><span class="when">출발</span><b>읽기 전</b><p class="hint">고른 이유 · 내용 예상 · 궁금한 점 · 읽기 계획</p><span class="st" data-st="pre"></span></div></a>
     <a class="stop" href="#" data-go="during"><span class="pin">2</span><div class="sc"><span class="when">날마다</span><b>읽는 중</b><p class="hint">독서 일지(도장) · 구절 모음 · 질문 메모</p><span class="st" data-st="during"></span></div></a>
@@ -486,12 +486,12 @@ table.t td.c{text-align:center;white-space:nowrap}
 </section>
 </main>
 <footer>
-  <b>북로드</b> · 책에서 만나는 지혜의 숲길 · 서버에 아무것도 저장하지 않아요 · <a href="guide.html" target="_blank">사용 안내·개인정보</a> · <a href="teacher.html" target="_blank">선생님용 페이지</a> · <span id="ver"></span><br>만든 사람: 광탄중학교 기술교사 강은영 · <a href="guide.html#m" target="_blank">문의</a>
+  <b>북로드</b> · 책과 함께 걷는 지혜의 숲길 · 서버에 아무것도 저장하지 않아요 · <a href="guide.html" target="_blank">사용 안내·개인정보</a> · <a href="teacher.html" target="_blank">선생님용 페이지</a> · <span id="ver"></span><br>만든 사람: 광탄중학교 기술교사 강은영 · <a href="guide.html#m" target="_blank">문의</a>
 </footer>
 <div class="toast" id="toast"></div>
 <div class="stampfx" id="stampFx" aria-live="polite"><img src="stamp.webp" alt="오늘의 독서 완료 도장"><p id="stampTxt"></p></div>
 
-<script src="core.js?v=1.3"></script>
+<script src="core.js?v=1.4"></script>
 <script>
 (function(){
 'use strict';
@@ -569,7 +569,7 @@ function renderBanners(){var h='';
 function renderHeader(){var t=CFG.title||R.NAME;document.title=t===R.NAME?R.NAME+' – '+R.SUB:t+' · '+R.NAME;$('#brandTitle').textContent=t;
   var sub=[CFG.school,CFG.cls].filter(Boolean).join(' · ');$('#brandSub').textContent=sub||(LINKED?R.SUB:'체험 모드 · '+R.SUB);
   $('#classPill').textContent=sub||'체험 모드';$('#elibLink').href=CFG.elib||R.DEF.elib;$('#ver').textContent='v'+R.VERSION;
-  $('#flowTitle').textContent=days()+'일의 길'}
+  $('#flowTitle').textContent='나의 지혜의 숲길 ('+days()+'일)'}
 function renderHome(){
   var s=startDate(),D=days(),t=today(),n=diff(s,t)+1,sm=R.summary(S,CFG),dates={},cps=(CFG.checks||[]).map(Number);
   arr('logs').forEach(function(l){dates[l.date]=1});
@@ -766,7 +766,7 @@ function sheetHTML(){var p=get('profile')||{},b=get('book')||{},pre=get('pre')||
    '<p class="hint" style="margin-top:16px">저장한 때: '+new Date().toLocaleString('ko-KR')+(dayNo()>=1?' ('+dayNo()+'일째)':'')+(LINKED&&!CFG_OK?' · ⚠ 링크 변경됨':'')+'</p>';
   return h}
 function renderSheet(){$('#sheet').innerHTML='<p class="hint noprint" style="margin-top:0">📄 내 기록장 미리보기</p>'+sheetHTML()}
-function fname(ext){var p=get('profile')||{};return ('북로드_책에서 만나는 지혜의 숲길_'+(R.gradeLabel(p.grade)||'')+'-'+(p.cls||'')+'-'+(p.num||'')+'_'+(p.name||'이름')+'_'+today().slice(5).replace('-','')).replace(/[\\/:*?"<>|]/g,'')+ext}
+function fname(ext){var p=get('profile')||{};return ('북로드_책과 함께 걷는 지혜의 숲길_'+(R.gradeLabel(p.grade)||'')+'-'+(p.cls||'')+'-'+(p.num||'')+'_'+(p.name||'이름')+'_'+today().slice(5).replace('-','')).replace(/[\\/:*?"<>|]/g,'')+ext}
 function download(name,blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},800)}
 function saveFile(){set('meta.backup',today());renderSheet();var css=document.querySelector('style').textContent;
   var data=JSON.stringify({app:'r40',v:1,savedAt:new Date().toISOString(),day:dayNo(),cfg:CFG,cfgOk:CFG_OK,linked:LINKED,S:S}).replace(/</g,'\\u003c');

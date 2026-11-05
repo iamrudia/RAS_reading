@@ -2,7 +2,7 @@
    서버·데이터베이스 없음. 학급 설정은 링크(#c=…) 안에, 학생 기록은 학생 브라우저에만 저장된다. */
 (function(g){
 'use strict';
-var R={VERSION:'1.3',NAME:'북로드',SUB:'책에서 만나는 지혜의 숲길'};
+var R={VERSION:'1.4',NAME:'북로드',SUB:'책과 함께 걷는 지혜의 숲길'};
 
 /* 학급 설정 기본값 */
 R.DEF={v:1,id:'',school:'',cls:'',title:'북로드',days:40,start:'',end:'',checks:[10,20,30],
