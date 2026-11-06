@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="stamp.webp">
+<title>전자도서관 이용 방법 – 북로드 (Book ROAD)</title>
+<style>
+:root{--paper:#f6f3ec;--card:#fffefb;--ink:#1f1c2e;--muted:#626b67;--line:#dcd7cb;--teal:#3b34a8;--teal-d:#2b2588;--teal-l:#ebe9fa;--navy:#2c4a7a;--gold:#c27c1a;--gold-l:#f6ecd4;
+  --serif:'Noto Serif KR','Noto Serif CJK KR','Nanum Myeongjo','Batang',serif;--sans:'Pretendard','Noto Sans KR','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.7;font-size:16px;word-break:keep-all;overflow-wrap:anywhere}
+a{color:var(--navy)}
+header{background:url(forest-dark.svg) repeat-x left bottom/200px 50px,linear-gradient(120deg,#2b2588,#3b34a8 60%,#5a4fd0);color:#fff;padding-bottom:26px}
+header .logo{width:34px;height:34px;transform:rotate(-8deg);background:#fff;border-radius:50%;padding:2px}
+header .in{max-width:1000px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header b{font-family:var(--serif);font-size:19px}
+header nav{margin-left:auto;display:flex;gap:14px;font-size:14px} header nav a{color:#fff}
+.hero{max-width:1000px;margin:0 auto;padding:30px 16px 8px}
+.hero .eb{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--teal);background:var(--teal-l);border-radius:999px;padding:3px 12px}
+h1,h2,h3{font-family:var(--serif);line-height:1.35}
+h1{font-size:32px;margin:12px 0 8px}
+.hero p{margin:0;color:var(--muted);max-width:720px}
+.toc{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 0}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px;text-decoration:none;color:var(--ink)}
+.toc a:hover{border-color:var(--teal);color:var(--teal)}
+main{max-width:1000px;margin:0 auto;padding:8px 16px 60px}
+section{scroll-margin-top:12px}
+h2{font-size:22px;margin:34px 0 12px;display:flex;align-items:center;gap:10px}
+h2 .no{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--teal);color:#fff;font-family:var(--sans);font-size:15px;flex:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
+.place{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:6px;box-shadow:0 1px 2px rgba(31,28,46,.04),0 10px 24px -18px rgba(31,28,46,.25)}
+.place h3{margin:0;font-size:19px}
+.place .sub{font-size:13px;color:var(--muted)}
+.place p{margin:2px 0 0;font-size:15px}
+.tag{align-self:flex-start;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--gold-l);color:var(--gold)}
+.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:10px}
+.links a{display:inline-flex;align-items:center;gap:4px;font-size:14px;text-decoration:none;border-radius:10px;padding:6px 11px;border:1px solid var(--teal);color:var(--teal);background:#fff}
+.links a.main{background:var(--teal);color:#fff}
+.links a:hover{filter:brightness(.95)}
+.note{background:var(--gold-l);border:1px solid #ecd9a8;border-radius:12px;padding:12px 16px;font-size:15px;margin-top:30px}
+.idea{background:var(--teal-l);border-radius:16px;padding:16px 20px;margin-top:14px}
+.idea ul{margin:6px 0 0;padding-left:20px} .idea li{margin:4px 0}
+footer{text-align:center;font-size:13px;color:var(--muted);padding:20px 16px 40px;border-top:1px solid var(--line)}
+@media (max-width:600px){h1{font-size:26px}.hero{padding-top:22px}}
+
+.steps{counter-reset:st;list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.steps li{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px 14px 60px}
+.steps li::before{counter-increment:st;content:counter(st);position:absolute;left:16px;top:14px;width:30px;height:30px;border-radius:50%;background:var(--teal);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.steps li>b:first-child{display:block}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.mem{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.mem.full{border:2px solid var(--teal)}
+.mem h3{margin:0 0 4px}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}
+.flow span{background:var(--teal-l);color:var(--teal-d);border-radius:8px;padding:3px 10px;font-size:14px;font-weight:600}
+.flow i{font-style:normal;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:15px;background:var(--card);border-radius:12px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}
+th{background:#ece7da;font-weight:600;white-space:nowrap}
+.tblwrap{overflow-x:auto}
+.pick{background:#fff7e6}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.cta a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;border-radius:12px;padding:11px 18px;font-weight:600}
+.cta a.main{background:var(--teal);color:#fff} .cta a.sub{border:1px solid var(--teal);color:var(--teal);background:#fff}
+</style>
+</head>
+<body>
+<header><div class="in"><img class="logo" src="stamp.webp" alt=""><b>북로드 · 전자도서관 이용 방법</b><nav><a href="index.html">← 학생 화면</a></nav></div></header>
+
+<div class="hero">
+  <span class="eb">📚 GYEONGGI E-LIBRARY</span>
+  <h1>경기도교육청 전자도서관 이용 방법</h1>
+  <p>도서관에 가지 않아도 전자책·오디오북·전자잡지를 언제 어디서나 볼 수 있어요. 북로드에서 읽을 책도 여기서 골라요. 처음 한 번만 회원가입을 하면 돼요.</p>
+  <div class="cta"><a class="main" href="https://lib.goe.go.kr/elib/index.do" target="_blank" rel="noopener">📚 전자도서관 열기 ↗</a><a class="sub" href="https://blog.naver.com/go_edu/224397538907" target="_blank" rel="noopener">경기도교육청 공식 안내 글 ↗</a></div>
+  <nav class="toc">
+    <a href="#s1">👤 회원가입</a><a href="#s2">📖 읽을 수 있는 자료</a><a href="#s3">📱 PC·모바일로 읽기</a><a href="#s4">✍ 북로드와 함께 쓰기</a>
+  </nav>
+</div>
+
+<main>
+<section id="s1">
+  <h2><span class="no">1</span>회원가입 — 준회원에서 정회원으로</h2>
+  <p>전자도서관은 <b>경기도교육청 통합도서관 회원</b>이 이용해요. 가입하면 준회원이 되고, 인증을 한 번 더 하면 <b>정회원</b>이 되어 모든 자료를 쓸 수 있어요.</p>
+  <div class="two">
+    <div class="mem"><h3>준회원</h3><div class="flow"><span>전자도서관 회원가입</span><i>→</i><span>본인 인증 (휴대폰·아이핀 등)</span><i>→</i><span>회원정보 입력</span></div><p class="sub" style="margin:4px 0 0">일부 서비스만 쓸 수 있어요.</p></div>
+    <div class="mem full"><h3>정회원 ✔ 북로드에는 이것!</h3><div class="flow"><span>준회원 가입</span><i>→</i><span>경기도민 인증</span></div><p class="sub" style="margin:4px 0 0">전자도서관의 모든 자료를 쓸 수 있어요. (선생님은 교직원 인증(EPKI)도 가능 — PC에서)</p></div>
+  </div>
+  <p class="note" style="margin-top:14px">👨‍👩‍👧 <b>만 14세 미만</b>이면 본인 인증과 함께 <b>보호자 인증</b>이 필요해요. 중학교 1·2학년은 보호자와 함께 가입하세요.</p>
+</section>
+
+<section id="s2">
+  <h2><span class="no">2</span>무엇을 읽을 수 있나요?</h2>
+  <div class="tblwrap"><table>
+    <tr><th>종류</th><th>서비스</th><th>내용</th></tr>
+    <tr class="pick"><td>구독형 전자책 ⭐</td><td><b>부커스</b></td><td>약 17만 종. 최신·인기 도서를 <b>예약·대기 없이 여러 사람이 동시에</b> 읽을 수 있어요. 정회원은 한 달에 5권까지 빌려요.</td></tr>
+    <tr><td>소장형 전자책·오디오북</td><td>전자책 / 오디오북</td><td>신간, 베스트셀러, 교과 연계 자료 등 약 3만 7천 종</td></tr>
+    <tr><td>전자잡지</td><td>모아진 (MOAZINE)</td><td>분야별 잡지 215종, 최신호·지난 호 약 2만 권</td></tr>
+    <tr><td>학술 자료</td><td>DBpia, 학지사·교보문고 스콜라</td><td>학술 논문 (탐구 보고서·자료 조사에 활용)</td></tr>
+    <tr><td>강좌·기타</td><td>다락원 어학, Medici.tv, 교양·자격증 강좌, AI 도서 추천, 북집 도서요약 등</td><td>외국어, 클래식 공연, 내 관심사에 맞는 책 추천 등</td></tr>
+  </table></div>
+  <p class="sub">자료 수는 2026년 9월 경기도교육청 안내 기준이에요. 바뀔 수 있어요.</p>
+</section>
+
+<section id="s3">
+  <h2><span class="no">3</span>PC·모바일로 읽기</h2>
+  <p>PC에서는 전자도서관에 로그인하면 모든 서비스를 쓸 수 있어요. <b>휴대폰·태블릿</b>으로 부커스 전자책과 모아진 잡지를 볼 때는 <b>전용 앱</b>을 설치해요.</p>
+  <div class="tblwrap"><table>
+    <tr><th>서비스</th><th>PC</th><th>휴대폰·태블릿</th></tr>
+    <tr class="pick"><td><b>부커스 전자책</b></td><td>로그인 → 구독 대출형 전자책 → 도서 검색 → 대출</td><td><b>‘부커스’ 앱</b> 설치 → ‘경기도교육청전자도서관’ 선택 → 로그인</td></tr>
+    <tr><td>소장형 전자책·오디오북</td><td colspan="2">로그인 → 전자책/오디오북 → 도서 검색 → 대출하고 읽기</td></tr>
+    <tr><td>모아진 전자잡지</td><td>로그인 → 전자잡지</td><td><b>‘도서관매거진’ 앱</b> 설치 → ‘경기도교육청’ 선택 → 로그인</td></tr>
+    <tr><td>학술 DB · 강좌 · AI 도서 추천</td><td colspan="2">로그인 → 해당 메뉴 (학술DB, 어학강좌, AI 도서 추천 등)</td></tr>
+  </table></div>
+</section>
+
+<section id="s4">
+  <h2><span class="no">4</span>북로드와 함께 쓰는 방법</h2>
+  <ol class="steps">
+    <li><b>책 고르기</b>전자도서관에서 읽고 싶은 책을 찾아요. 반 친구들과 같은 책을 읽고 싶다면 <b>부커스</b>가 좋아요. 여러 명이 동시에 빌릴 수 있어요. ‘AI 도서 추천’으로 내 관심사에 맞는 책을 찾아봐도 좋아요.</li>
+    <li><b>북로드 ‘내 책’에 적기</b>책 제목·지은이·출판사, 그리고 <b>전체 쪽수</b>를 적어요. 전체 쪽수가 있어야 읽은 정도(%)와 ‘끝까지 읽었는지’를 알 수 있어요.</li>
+    <li><b>같은 기기·같은 글자 크기로 읽기</b>전자책은 글자 크기를 바꾸면 쪽수가 달라져요. 한 기기에서 같은 글자 크기로 읽고, 날마다 <b>마지막으로 읽은 쪽</b>을 독서 일지에 적어요.</li>
+    <li><b>대출 기간 확인하기</b>전자책은 대출 기간이 끝나면 자동으로 반납돼요. 다 읽지 못했다면 연장하거나 다시 빌려요.</li>
+    <li><b>다 읽으면 다음 책</b>끝까지 읽고 ③ 읽은 후까지 마치면, 기간 안에 다음 책을 빌려 이어서 읽을 수 있어요.</li>
+  </ol>
+</section>
+
+<p class="note">📌 이 안내는 경기도교육청 공식 블로그의 「언제 어디서든 Reading ON! 경기도교육청전자도서관 안내」(2026. 9. 1.)를 바탕으로 정리했어요. 가입·대출 규칙은 바뀔 수 있으니 자세한 내용은 <a href="https://blog.naver.com/go_edu/224397538907" target="_blank" rel="noopener">공식 안내 글</a>과 <a href="https://lib.goe.go.kr/elib/index.do" target="_blank" rel="noopener">전자도서관</a>에서 확인하세요.</p>
+</main>
+<footer><b>북로드</b> · 책과 함께 걷는 지혜의 숲길 · <a href="index.html">학생 화면으로 돌아가기</a> · <a href="paju.html">파주 책문화 탐방</a></footer>
+</body>
+</html>
