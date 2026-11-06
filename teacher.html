@@ -115,6 +115,14 @@ input.bad{border-color:#c0392b;background:#fff5f4}
     <label class="f">활동 목록</label>
     <div class="acts" id="acts"></div>
     <p class="hint">소설 전용·비문학 전용 활동은 학생이 고른 책의 갈래에 맞을 때만 보여요.</p>
+    <label class="f">여러 권 읽기</label>
+    <div class="radios">
+      <label><input type="checkbox" id="multi" checked> <b>여러 권 읽기 허용</b> — 기간 안에 책을 끝까지 읽고 ③ 읽은 후까지 마치면 <b>다음 책</b>을 시작할 수 있어요. 다 읽은 책은 학생의 ‘내 책장’에 남고, 도장판은 그대로 이어져요.</label>
+      <div id="actForWrap" style="padding-left:24px">
+        <label><input type="radio" name="actFor" value="one" checked> 독후활동은 <b>대표 책 1권</b>만 (추천)</label>
+        <label><input type="radio" name="actFor" value="each"> 독후활동을 <b>책마다</b></label>
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -162,7 +170,7 @@ input.bad{border-color:#c0392b;background:#fff5f4}
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="core.js?v=1.5"></script>
+<script src="core.js?v=1.6"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function(){
@@ -173,13 +181,13 @@ function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearT
 function base(){return new URL('index.html',location.href).href.split('#')[0]}
 
 function renderActs(sel){$('#acts').innerHTML=['write','think','show'].map(function(c){return '<div class="h">'+R.CATS[c]+'</div>'+R.ACTS.filter(function(a){return a.cat===c}).map(function(a){return '<label><input type="checkbox" value="'+a.id+'"'+(sel.indexOf(a.id)>=0?' checked':'')+'> '+a.ic+' '+R.esc(a.name)+(R.GN[a.g]?' <span class="hint">('+R.GN[a.g]+')</span>':'')+'</label>'}).join('')}).join('')}
-function syncMode(){var m=mode();$('#acts').classList.toggle('off',m==='free');$('#countWrap').style.display=m==='fixed'?'none':''}
+function syncMode(){var m=mode();$('#actForWrap').style.opacity=$('#multi').checked?'':'.4';$('#acts').classList.toggle('off',m==='free');$('#countWrap').style.display=m==='fixed'?'none':''}
 function mode(){var r=$$('input[name=mode]').filter(function(x){return x.checked})[0];return r?r.value:'free'}
 
 function fill(c){c=R.full(c);ID=c.id||R.uid(6);$('#cid').textContent=ID;
   $('#school').value=c.school||'';$('#cls').value=c.cls||'';$('#title').value=c.title===R.DEF.title?'':c.title;$('#start').value=c.start||'';$('#end').value=c.end||'';LOADED_START=c.start||'';periodHint();
   $('#checks').value=(c.checks||[]).join(', ');$('#elib').value=c.elib||R.DEF.elib;$('#upload').value=c.upload||'';$('#uploadLabel').value=c.uploadLabel===R.DEF.uploadLabel?'':c.uploadLabel;$('#agent').value=c.agent||'';$('#agentLabel').value=c.agentLabel===R.DEF.agentLabel?'':c.agentLabel;
-  $$('input[name=mode]').forEach(function(r){r.checked=r.value===(c.mode||'free')});$('#count').value=c.count||1;renderActs(c.acts||[]);syncMode()}
+  $$('input[name=mode]').forEach(function(r){r.checked=r.value===(c.mode||'free')});$('#count').value=c.count||1;$('#multi').checked=c.multi!==false;$$('input[name=actFor]').forEach(function(r){r.checked=r.value===(c.actFor||'one')});renderActs(c.acts||[]);syncMode()}
 var LOADED_START='';
 function periodDays(){var s=R.parseDate($('#start').value),e=R.parseDate($('#end').value);return s&&e&&e>=s?R.diff(s,e)+1:40}
 function periodHint(){var s=R.parseDate($('#start').value),e=R.parseDate($('#end').value);
@@ -187,7 +195,7 @@ function periodHint(){var s=R.parseDate($('#start').value),e=R.parseDate($('#end
 function read(){var c={v:1,id:ID,school:$('#school').value.trim(),cls:$('#cls').value.trim(),title:$('#title').value.trim()||R.DEF.title,start:R.parseDate($('#start').value),end:R.parseDate($('#end').value),
    days:periodDays(),checks:$('#checks').value.split(/[,\s]+/).map(Number).filter(function(n){return n>0}),
    elib:$('#elib').value.trim()||R.DEF.elib,upload:$('#upload').value.trim(),uploadLabel:$('#uploadLabel').value.trim()||R.DEF.uploadLabel,agent:$('#agent').value.trim(),agentLabel:$('#agentLabel').value.trim()||R.DEF.agentLabel,
-   mode:mode(),acts:$$('#acts input:checked').map(function(x){return x.value}),count:Math.max(1,+$('#count').value||1)};
+   mode:mode(),acts:$$('#acts input:checked').map(function(x){return x.value}),count:Math.max(1,+$('#count').value||1),multi:$('#multi').checked,actFor:($$('input[name=actFor]').filter(function(x){return x.checked})[0]||{}).value||'one'};
   return c}
 /* 기본값과 같은 항목은 빼서 링크를 짧게 */
 function compact(c){var o={};for(var k in c){var v=c[k],d=R.DEF[k];if(k==='v'||k==='id'||JSON.stringify(v)!==JSON.stringify(d))o[k]=v}return o}
@@ -220,7 +228,7 @@ function loadFrom(url){var d=R.cfgFromUrl(url);if(!d||!d.cfg.id){toast('독서�
 document.addEventListener('DOMContentLoaded',function(){
   R.dateField($('#start'),periodHint,{min:R.today});R.dateField($('#end'),periodHint,{min:function(){return R.parseDate($('#start').value)||R.today()}});fill(null);renderRecent();$('#agentPrompt').value=R.AGENT_PROMPT;
   $('#copyAgent').addEventListener('click',function(){var t=$('#agentPrompt');(navigator.clipboard?navigator.clipboard.writeText(R.AGENT_PROMPT):Promise.reject()).then(function(){toast('지시문을 복사했어요')},function(){t.select();try{document.execCommand('copy');toast('지시문을 복사했어요')}catch(e){}})});
-  $$('input[name=mode]').forEach(function(r){r.addEventListener('change',syncMode)});
+  $$('input[name=mode]').forEach(function(r){r.addEventListener('change',syncMode)});$('#multi').addEventListener('change',syncMode);
   $('#make').addEventListener('click',make);
   $('#newClass').addEventListener('click',function(){if(confirm('새 학급 코드로 처음부터 시작할까요? (새 링크의 학생 기록은 기존 링크와 따로 저장돼요)')){fill(null);$('#outCard').style.display='none'}});
   $('#loadLink').addEventListener('click',function(){loadFrom($('#pasteLink').value)});

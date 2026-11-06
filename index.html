@@ -145,6 +145,19 @@ body.g-fic [data-genre=non], body.g-non [data-genre=fic]{display:none!important}
 .cal .d.done b{position:absolute;top:5px;left:7px;z-index:1;font-size:12px;font-family:var(--sans);background:rgba(255,255,255,.9);border-radius:6px;padding:0 5px;color:var(--teal-d)}
 .cal .d.done .md{display:none}
 .cal .d.done::before{content:'';position:absolute;inset:3px;background:url(stamp.webp) center/contain no-repeat;transform:rotate(var(--r,0deg));mix-blend-mode:multiply;opacity:.92}
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.sbook{position:relative;display:flex;flex-direction:column;gap:3px;padding:14px 14px 12px 20px;border-radius:12px;background:#fff;border:1px solid var(--line);border-left:8px solid var(--teal)}
+.sbook:nth-child(3n+2){border-left-color:var(--navy)} .sbook:nth-child(3n){border-left-color:var(--gold)}
+.sbook .sno{position:absolute;top:10px;right:12px;font-size:12px;color:var(--muted)}
+.sbook b{font-family:var(--serif);font-size:17px;padding-right:30px}
+.sbook q{font-size:14px;color:var(--ink)} .sbook .sstar{color:var(--gold);letter-spacing:1px}
+.sbook .btn{align-self:flex-start;margin-top:6px}
+.cal .d .bno{position:absolute;right:5px;top:4px;z-index:1;font-style:normal;font-size:10px;line-height:16px;min-width:16px;text-align:center;border-radius:8px;background:var(--teal);color:#fff;padding:0 4px}
+.modal{position:fixed;inset:0;z-index:80;background:rgba(31,28,46,.45);display:none;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto}
+.modal.on{display:flex}
+.modal .mbox{position:relative;background:var(--card);border-radius:16px;max-width:900px;width:100%;padding:22px 22px 26px;box-shadow:var(--shadow)}
+.modal .mbox>.x{position:absolute;top:10px;right:12px;font-size:22px}
+h2.bk{margin-top:30px;padding:8px 14px;border-radius:10px;background:var(--teal-l);font-size:19px}
 .stampfx{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;background:rgba(244,241,234,.6);opacity:0;transition:opacity .3s}
 .stampfx.on{opacity:1}
 .stampfx img{width:min(62vw,300px);transform:rotate(-8deg)}
@@ -267,6 +280,11 @@ table.t td.c{text-align:center;white-space:nowrap}
     <div class="calNav"><button id="calPrev" aria-label="이전 달">◀</button><b id="calMonth"></b><button id="calNext" aria-label="다음 달">▶</button></div>
     <div class="calWeek"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
     <div class="cal" id="cal"></div>
+  </div>
+
+  <div class="card" id="shelfCard" style="display:none;margin-top:14px">
+    <div class="boardHead"><h3>📚 내 책장</h3><span class="hint" id="shelfInfo"></span></div>
+    <div class="shelf" id="shelf"></div>
   </div>
 
   <div class="grid2" style="margin-top:8px">
@@ -491,10 +509,11 @@ table.t td.c{text-align:center;white-space:nowrap}
 <footer>
   <b>북로드</b> · 책과 함께 걷는 지혜의 숲길 · 서버에 아무것도 저장하지 않아요 · <a href="guide.html" target="_blank">사용 안내·개인정보</a> · <a href="teacher.html" target="_blank">선생님용 페이지</a> · <span id="ver"></span><br>만든 사람: 광탄중학교 기술교사 강은영 · <a href="guide.html#m" target="_blank">문의</a>
 </footer>
+<div class="modal" id="shelfModal" role="dialog" aria-modal="true"><div class="mbox"><button class="x" id="shelfClose" title="닫기">×</button><div id="shelfView"></div></div></div>
 <div class="toast" id="toast"></div>
 <div class="stampfx" id="stampFx" aria-live="polite"><img src="stamp.webp" alt="오늘의 독서 완료 도장"><p id="stampTxt"></p></div>
 
-<script src="core.js?v=1.5"></script>
+<script src="core.js?v=1.6"></script>
 <script>
 (function(){
 'use strict';
@@ -561,6 +580,9 @@ function dayNo(){return diff(startDate(),today())+1}
 function renderBanners(){var h='';
   if(!LINKED)h+='<div class="banner info">🧪 <span><b>체험 모드</b>예요. 학급에서 쓰려면 선생님께 받은 링크(또는 QR코드)로 들어오세요. 선생님이시면 <a href="teacher.html">선생님용 페이지</a>에서 우리 반 링크를 만들 수 있어요.</span></div>';
   if(LINKED&&!CFG_OK)h+='<div class="banner alert">⚠ <span>링크 주소가 바뀌었어요. 선생님께 받은 링크로 다시 들어와 주세요.</span></div>';
+  if(CFG.multi!==false&&R.bookDone(S)&&today()<=endDate()){var bt='「'+esc(get('book.title')||'이 책')+'」';
+    h+=R.st.post(S)===2?'<div class="banner info">🎉 <span>'+bt+'을(를) 끝까지 읽고 ③ 읽은 후까지 마쳤어요! 남은 기간에 <b>다음 책</b>을 읽어 볼까요? 지금 책의 기록은 내 책장에 남아요.</span><button class="btn sm teal" id="nextBook">📚 다음 책 시작하기</button></div>'
+      :'<div class="banner info">📖 <span>'+bt+'을(를) 끝까지 읽었어요! <b>③ 읽은 후</b>를 마치면 다음 책을 시작할 수 있어요.</span><button class="btn sm" data-go="post">③ 쓰러 가기</button></div>'}
   var n=dayNo(),cps=(CFG.checks||[]).map(Number).filter(Boolean),hasData=arr('logs').length||filled(get('book.title'));
   if(hasData&&cps.indexOf(n)>=0)h+='<div class="banner warn">📌 <span>오늘은 <b>'+n+'일째 중간 점검</b> 날이에요. 기록장 파일을 저장해서 제출 폴더에 올려 주세요.</span><button class="btn sm red" data-go="fin">제출하러 가기</button></div>';
   else if(hasData&&n===days())h+='<div class="banner warn">🎉 <span>오늘은 <b>마지막 날</b>이에요! ⑤에서 마무리하고 제출해요.</span><button class="btn sm red" data-go="fin">마무리하러 가기</button></div>';
@@ -575,7 +597,7 @@ function renderHeader(){var t=CFG.title||R.NAME;document.title=t===R.NAME?R.NAME
   $('#flowTitle').textContent='나의 지혜의 숲길'}
 function renderHome(){
   var s=startDate(),D=days(),t=today(),n=diff(s,t)+1,sm=R.summary(S,CFG),dates={},cps=(CFG.checks||[]).map(Number);
-  arr('logs').forEach(function(l){dates[l.date]=1});
+  R.allLogs(S).forEach(function(l){dates[l.date]=1});
   $('#stDay').textContent=n<1?'D'+(n-1):n>D?'끝':n+'일';
   $('#stLogs').textContent=sm.logDays+'개';
   $('#stPct').textContent=sm.pct+'%';$('#pctBar').style.width=sm.pct+'%';
@@ -584,7 +606,7 @@ function renderHome(){
   $('#todayBox').className='today'+(dates[t]?'':' no');
   $('#todayBox').innerHTML=dates[t]?'<img src="stamp.webp" alt=""><span><b>오늘의 도장을 받았어요!</b><br><span class="hint">내일도 한 쪽, 이어서 걸어가요.</span></span>'
     :'<span style="font-size:26px">📖</span><span><b>아직 오늘의 도장이 없어요.</b><br><span class="hint">'+(nextCp&&n>=1?'다음 중간 점검은 '+nextCp+'일째('+md(addD(s,nextCp-1))+')예요.':'조금이라도 읽고 기록하면 도장이 찍혀요.')+'</span></span>';
-  renderCal();
+  renderCal();renderShelf();
   $$('[data-st]').forEach(function(el){el.innerHTML=stTxt(st(el.dataset.st))});
   $$('.stop').forEach(function(el){var v=st(el.dataset.go);el.className='stop s'+v;el.querySelector('.pin').textContent=v===2?'✓':PAGES.indexOf(el.dataset.go)});
   $('#startHint').textContent='오늘('+R.digits8(today())+') 이후로 골라요. '+(get('book.start')?'':(CFG.start?'비워 두면 선생님이 정한 '+R.fmtD(CFG.start)+'부터 셉니다.':'비워 두면 첫 기록(오늘)부터 셉니다.'));
@@ -593,8 +615,9 @@ function renderHome(){
 /* 월별 도장판 (◀ ▶로 달 넘기기) */
 var calYM=null;
 function ymOf(iso){var d=R.pd(iso);return d.getFullYear()*12+d.getMonth()}
-function calDates(){var d={};arr('logs').forEach(function(l){d[l.date]=1});return d}
-function renderCal(){var s=startDate(),e=endDate(),t=today(),dates=calDates(),cps=(CFG.checks||[]).map(Number),lo=ymOf(s),hi=ymOf(e);
+function calDates(){var d={};R.allLogs(S).forEach(function(l){d[l.date]=1});return d}
+function calBooks(){var m={},sh=R.shelf(S);if(!sh.length)return m;sh.forEach(function(b,i){R.arr(b,'logs').forEach(function(l){m[l.date]=i+1})});arr('logs').forEach(function(l){m[l.date]=sh.length+1});return m}
+function renderCal(){var s=startDate(),e=endDate(),t=today(),dates=calDates(),bks=calBooks(),cps=(CFG.checks||[]).map(Number),lo=ymOf(s),hi=ymOf(e);
   if(calYM==null)calYM=Math.min(hi,Math.max(lo,ymOf(t)));
   calYM=Math.min(hi,Math.max(lo,calYM));
   var y=Math.floor(calYM/12),m=calYM%12;$('#calMonth').textContent=y+'년 '+(m+1)+'월';
@@ -603,7 +626,7 @@ function renderCal(){var s=startDate(),e=endDate(),t=today(),dates=calDates(),cp
   for(var i=0;i<off;i++)h+='<div class="d blank"></div>';
   for(var dd=1;dd<=nd;dd++){var iso=R.iso(new Date(y,m,dd)),inR=iso>=s&&iso<=e,k=diff(s,iso)+1;
     var c='d'+(inR?'':' off')+(inR&&dates[iso]?' done':'')+(iso===t?' today':'')+(inR&&iso>t?' future':'')+(inR&&cps.indexOf(k)>=0?' cp':'');
-    h+='<div class="'+c+'" title="'+iso+(inR?' · '+k+'일째':'')+(inR&&dates[iso]?' 독서 완료':'')+'"'+(inR&&dates[iso]?' style="--r:'+((k*37)%25-12)+'deg"':'')+'><b>'+dd+'</b><span class="md">'+(inR?k+'일째':'')+'</span></div>'}
+    h+='<div class="'+c+'" title="'+iso+(inR?' · '+k+'일째':'')+(inR&&dates[iso]?' 독서 완료':'')+'"'+(inR&&dates[iso]?' style="--r:'+((k*37)%25-12)+'deg"':'')+'><b>'+dd+'</b><span class="md">'+(inR?k+'일째':'')+'</span>'+(inR&&dates[iso]&&bks[iso]?'<i class="bno" title="'+bks[iso]+'번째 책">'+bks[iso]+'</i>':'')+'</div>'}
   $('#cal').innerHTML=h}
 /* 저장 파일용 도장판 그림 (기간 전체, 월별) */
 var stampImg=new Image();stampImg.src='stamp.webp';
@@ -675,6 +698,8 @@ function renderAct(){renderCoach();
   var m=mode(),av=R.actAvail(S,CFG),ch=actChosen(),need=actNeed(),g=genre();
   var lead=m==='fixed'?'선생님이 정한 활동 <b>'+need+'개</b>를 모두 완성해요.':(m==='pick'?'선생님이 고른 활동 가운데':'아래 활동 가운데')+' <b>'+need+'개 이상</b> 골라 완성해요. 더 해도 좋아요!';
   if(!g)lead+=' <span class="pill r">‘내 책’에서 갈래를 고르면 책에 맞는 활동만 보여요</span>';
+  var rep=R.actRep(S,CFG);if(rep&&R.st.actOwn(S,CFG)<2)lead='✔ 독후활동은 <b>대표 책 1권</b>만 하면 돼요. 「'+esc(R.get(rep,'book.title')||'')+'」에서 이미 완성했어요. 이 책으로도 해 보고 싶다면 아래에서 골라요.';
+  else if(CFG.multi!==false&&CFG.actFor!=='each'&&R.shelf(S).length===0)lead+=' <span class="hint">(여러 권을 읽어도 독후활동은 대표 책 1권만 하면 돼요)</span>';
   $('#actLead').innerHTML=lead;
   var h='';
   ['write','think','show'].forEach(function(c){var list=av.filter(function(a){return a.cat===c});if(!list.length)return;
@@ -731,8 +756,9 @@ function renderCheck(){var p=get('profile')||{},b=get('book')||{},sm=R.summary(S
    ['② 독서 일지 ('+sm.logs+'회 · 10회 이상 권장)',sm.during,'during'],
    ['② 구절 모음 ('+sm.quotes+'개)',sm.quotes?2:0,'during'],
    ['③ 읽은 후',sm.post,'post'],
-   ['④ 독후활동 ('+sm.actDone+'/'+sm.actNeed+')',sm.act,'act'],
+   [sm.actRep&&R.st.actOwn(S,CFG)<2?'④ 독후활동 (대표 책 「'+esc(sm.actRep)+'」에서 완성)':'④ 독후활동 ('+sm.actDone+'/'+sm.actNeed+')',sm.act,'act'],
    ['⑤ 별점·한 줄 평·자기평가',sm.fin,'fin']];
+  if(sm.done>1||R.shelf(S).length)items.push(['📚 내 책장 (완독 '+sm.done+'권 · '+sm.pagesAll+'쪽)',2,'home']);
   $('#check').innerHTML=items.map(function(it){return '<div><span class="'+(it[1]===2?'ok':it[1]?'mid':'no')+'">'+(it[1]===2?'✔':it[1]?'●':'✗')+'</span> <a href="#" data-go="'+it[2]+'">'+it[0]+'</a></div>'}).join('')}
 function renderFin(){renderStars();renderRub();renderCheck();renderSheet();applyUpload()}
 
@@ -751,12 +777,25 @@ function actSheet(a){var h='<h4>'+a.ic+' '+esc(a.name)+'</h4>';
   });
   if(a.mm){var sv=mmSVG(a);if(sv)h+='<div class="mm">'+sv+'</div>'}
   return h}
-function sheetHTML(){var p=get('profile')||{},b=get('book')||{},pre=get('pre')||{},po=get('post')||{},fn=get('fin')||{},sv=get('self')||{},g=genre(),s=startDate();
-  var logs=arr('logs').slice().sort(function(x,y){return x.date<y.date?-1:x.date>y.date?1:0});
+/* 내 책장의 책 B를 잠시 '지금 책'으로 바꿔 그린다 (기록은 바꾸지 않음) */
+function withBook(B,fn){var keep=S,T={};for(var k in keep)T[k]=keep[k];R.BOOK_KEYS.forEach(function(k){delete T[k];if(B[k]!==undefined)T[k]=B[k]});S=T;try{return fn()}finally{S=keep}}
+function logRange(){var l=arr('logs').map(function(x){return x.date}).sort();return l.length?R.fmtD(l[0])+' ~ '+R.fmtD(l[l.length-1])+' ('+l.length+'회 기록)':''}
+function sheetHTML(){var p=get('profile')||{},sh=R.shelf(S),sm=R.summary(S,CFG);
   var h='<h2>📚 '+esc(CFG.title||R.NAME)+' <span style="font-size:14px;color:#6a6578;font-weight:400">'+esc(R.SUB)+'</span></h2>'+
-   '<p>'+esc([CFG.school,CFG.cls].filter(Boolean).join(' · '))+' &nbsp; '+esc(R.gradeLabel(p.grade)||'_학년')+' '+esc(p.cls||'_')+'반 '+esc(p.num||'_')+'번 · 이름: <b>'+esc(p.name||'______')+'</b></p>'+
-   '<table class="t"><tr><th style="width:110px">책 제목</th><td colspan="3"><b>'+esc(b.title||'')+'</b></td></tr><tr><th>지은이</th><td>'+esc(b.author||'')+'</td><th style="width:90px">출판사</th><td>'+esc(b.pub||'')+'</td></tr>'+
-   '<tr><th>갈래</th><td>'+(g==='fic'?'소설·이야기':g==='non'?'비문학':'')+'</td><th>독서 기간</th><td>'+R.fmtD(s)+' ~ '+R.fmtD(endDate())+' ('+days()+'일)</td></tr>'+
+   '<p>'+esc([CFG.school,CFG.cls].filter(Boolean).join(' · '))+' &nbsp; '+esc(R.gradeLabel(p.grade)||'_학년')+' '+esc(p.cls||'_')+'반 '+esc(p.num||'_')+'번 · 이름: <b>'+esc(p.name||'______')+'</b></p>';
+  if(sh.length){var cur=R.started(S);
+    h+='<h3>📚 내 책장 — 이번 숲길에서 읽은 책 '+sm.books+'권 · '+sm.pagesAll+'쪽</h3><table class="t"><tr><th style="width:40px"></th><th>책 제목</th><th>지은이</th><th>읽은 날</th><th style="width:80px">상태</th></tr>'+
+     sh.map(function(b,i){return withBook(b,function(){return '<tr><td class="c">'+(i+1)+'</td><td><b>'+esc(get('book.title')||'')+'</b></td><td>'+esc(get('book.author')||'')+'</td><td>'+logRange()+'</td><td class="c">✔ 완독</td></tr>'})}).join('')+
+     (cur?'<tr><td class="c">'+(sh.length+1)+'</td><td><b>'+esc(get('book.title')||'')+'</b></td><td>'+esc(get('book.author')||'')+'</td><td>'+logRange()+'</td><td class="c">'+(R.bookDone(S)?'✔ 완독':'읽는 중')+'</td></tr>':'')+'</table>';
+    sh.forEach(function(b,i){h+=withBook(b,function(){return '<h2 class="bk">📗 '+(i+1)+'번째 책 · 「'+esc(get('book.title')||'제목 없음')+'」</h2>'+bookPart(true)})});
+    if(cur)h+='<h2 class="bk">📖 '+(sh.length+1)+'번째 책 · 「'+esc(get('book.title')||'제목 없음')+'」'+(R.bookDone(S)?'':' (읽는 중)')+'</h2>'+bookPart(false)}
+  else h+=bookPart(false);
+  return h+(function(){var b=boardPNG();return b?'<h3>📮 나의 독서 도장판</h3><img src="'+b+'" alt="나의 독서 도장판" style="max-width:100%;max-height:none;border:0;border-radius:0">':''})()+
+   '<p class="hint" style="margin-top:16px">저장한 때: '+new Date().toLocaleString('ko-KR')+(dayNo()>=1?' ('+dayNo()+'일째)':'')+(LINKED&&!CFG_OK?' · ⚠ 링크 변경됨':'')+'</p>'}
+function bookPart(archived){var b=get('book')||{},pre=get('pre')||{},po=get('post')||{},fn=get('fin')||{},sv=get('self')||{},g=genre(),s=startDate();
+  var logs=arr('logs').slice().sort(function(x,y){return x.date<y.date?-1:x.date>y.date?1:0}),rep=CFG.actFor!=='each'&&R.st.actOwn(S,CFG)<2&&R.actRep(S,CFG);
+  var h='<table class="t"><tr><th style="width:110px">책 제목</th><td colspan="3"><b>'+esc(b.title||'')+'</b></td></tr><tr><th>지은이</th><td>'+esc(b.author||'')+'</td><th style="width:90px">출판사</th><td>'+esc(b.pub||'')+'</td></tr>'+
+   '<tr><th>갈래</th><td>'+(g==='fic'?'소설·이야기':g==='non'?'비문학':'')+(b.pages?' · '+esc(b.pages)+'쪽':'')+'</td><th>'+(archived?'읽은 날':'독서 기간')+'</th><td>'+(archived?logRange():R.fmtD(s)+' ~ '+R.fmtD(endDate())+' ('+days()+'일)')+'</td></tr>'+
    '<tr><th>별점</th><td>'+(fn.star?'★★★★★'.slice(0,+fn.star)+'☆☆☆☆☆'.slice(0,5-fn.star):'')+'</td><th>한 줄 평</th><td>'+esc(fn.oneline||'')+'</td></tr></table>'+
    '<h3>① 읽기 전</h3>'+qa('고른 이유',arr('pre.chips').join(', ')+(pre.why?'\n'+pre.why:''))+qa('내용 예상',pre.predict)+qa('궁금한 점',pre.wonder)+qa('읽기 계획',[pre.size&&'분량: '+pre.size,pre.daily&&'하루 목표: '+pre.daily,pre.when&&'독서 약속: '+pre.when].filter(Boolean).join('\n'))+
    '<h3>② 읽는 중</h3><h4>독서 일지 ('+logs.length+'회)</h4>'+(logs.length?'<table class="t"><tr><th style="width:80px">날짜</th><th>읽은 쪽 · 장</th><th style="width:50px">%</th><th>한 줄 메모</th><th style="width:40px"></th></tr>'+logs.map(function(l){return '<tr><td class="c">'+md(l.date)+'</td><td>'+esc(R.pageText(l))+'</td><td class="c">'+(filled(l.pct)?esc(l.pct):'')+'</td><td>'+esc(l.memo)+'</td><td class="c">'+esc(l.mood)+'</td></tr>'}).join('')+'</table>':'<span class="blank">(기록 없음)</span>')+
@@ -765,12 +804,27 @@ function sheetHTML(){var p=get('profile')||{},b=get('book')||{},pre=get('pre')||
    '<h3>③ 읽은 후</h3>'+(g==='non'?qa('주제',po.theme)+qa('중요한 내용 ①',po.key1)+qa('중요한 내용 ②',po.key2)+qa('중요한 내용 ③',po.key3):qa('줄거리',po.summary))+
    qa('읽은 후 느낌',po.feel)+qa('감명 깊은 부분',po.best)+qa('그 까닭',po.bestWhy)+qa('함께 나눌 질문',po.share)+qa('그 질문에 대한 내 생각',po.shareMine)+
    ((filled(po.deep1)||filled(po.deep2))?qa('작가의 관점 평가',po.deep1)+qa('다른 것과 견주기',po.deep2):'')+
-   '<h3>④ 독후활동</h3>'+((filled(get('coach.reply'))||filled(get('coach.why')))?'<h4>🤖 AI 독후활동 코치 활용</h4>'+qa('AI 코치의 추천',get('coach.reply'))+qa('나의 결정',{'따름':'추천을 따름','일부':'일부만 따름','바꿈':'추천과 다르게 고름'}[get('coach.decision')]||'')+qa('그 이유',get('coach.why')):'')+(actChosen().length?actChosen().map(actSheet).join(''):'<span class="blank">(고른 활동 없음)</span>')+
+   '<h3>④ 독후활동</h3>'+((filled(get('coach.reply'))||filled(get('coach.why')))?'<h4>🤖 AI 독후활동 코치 활용</h4>'+qa('AI 코치의 추천',get('coach.reply'))+qa('나의 결정',{'따름':'추천을 따름','일부':'일부만 따름','바꿈':'추천과 다르게 고름'}[get('coach.decision')]||'')+qa('그 이유',get('coach.why')):'')+(actChosen().length?actChosen().map(actSheet).join(''):'<span class="blank">'+(rep?'(대표 책 「'+esc(R.get(rep,'book.title')||'')+'」에서 완성)':'(고른 활동 없음)')+'</span>')+
    '<h3>⑤ 마무리</h3>'+qa('독서 소감',fn.reflect)+qa('다음에 읽고 싶은 책',fn.next)+
-   '<table class="t" style="margin-top:8px"><tr><th style="width:120px">자기평가</th><th>나의 판단</th></tr>'+RUB.map(function(r,i){return '<tr><td>'+r[0]+'</td><td>'+(sv[i]?['','잘함','보통','노력 필요'][sv[i]]+' – '+r[sv[i]]:'<span class="blank">(미선택)</span>')+'</td></tr>'}).join('')+'</table>'+
-   (function(){var b=boardPNG();return b?'<h3>📮 나의 독서 도장판</h3><img src="'+b+'" alt="나의 독서 도장판" style="max-width:100%;max-height:none;border:0;border-radius:0">':''})()+
-   '<p class="hint" style="margin-top:16px">저장한 때: '+new Date().toLocaleString('ko-KR')+(dayNo()>=1?' ('+dayNo()+'일째)':'')+(LINKED&&!CFG_OK?' · ⚠ 링크 변경됨':'')+'</p>';
+   '<table class="t" style="margin-top:8px"><tr><th style="width:120px">자기평가</th><th>나의 판단</th></tr>'+RUB.map(function(r,i){return '<tr><td>'+r[0]+'</td><td>'+(sv[i]?['','잘함','보통','노력 필요'][sv[i]]+' – '+r[sv[i]]:'<span class="blank">(미선택)</span>')+'</td></tr>'}).join('')+'</table>';
   return h}
+/* ───────── 내 책장 ───────── */
+function renderShelf(){var sh=R.shelf(S),el=$('#shelfCard');if(!el)return;if(!sh.length){el.style.display='none';return}el.style.display='';
+  var sm=R.summary(S,CFG);$('#shelfInfo').textContent='다 읽은 책 '+sh.length+'권 · 지금까지 읽은 쪽 '+sm.pagesAll+'쪽 · 도장판의 숫자는 몇 번째 책인지 알려 줘요';
+  $('#shelf').innerHTML=sh.map(function(b,i){var bk=b.book||{},f=b.fin||{},lg=R.arr(b,'logs').map(function(l){return l.date}).sort();
+    return '<div class="sbook"><span class="sno">'+(i+1)+'번째 책</span><b>'+esc(bk.title||'제목 없음')+'</b><span class="hint">'+esc(bk.author||'')+(bk.pages?' · '+esc(bk.pages)+'쪽':'')+'</span>'+
+      (lg.length?'<span class="hint">'+md(lg[0])+' ~ '+md(lg[lg.length-1])+' · 기록 '+lg.length+'회</span>':'')+(f.star?'<span class="sstar">'+'★★★★★'.slice(0,+f.star)+'</span>':'')+(f.oneline?'<q>'+esc(f.oneline)+'</q>':'')+
+      '<button class="btn ghost sm" data-shelf="'+i+'">📖 기록 보기</button></div>'}).join('')}
+function openShelf(i){var b=R.shelf(S)[i];if(!b)return;
+  $('#shelfView').innerHTML=withBook(b,function(){return '<h2 class="bk" style="margin-top:0">📗 '+(i+1)+'번째 책 · 「'+esc(get('book.title')||'제목 없음')+'」</h2>'+bookPart(true)})+'<p class="hint">내 책장에 꽂은 책의 기록은 읽기만 할 수 있어요. 저장 파일에도 함께 들어가요.</p>';
+  $('#shelfModal').classList.add('on');$('#shelfModal').scrollTop=0}
+function nextBook(){if(!R.canNext(S,CFG))return;var t=get('book.title')||'이 책';
+  if(get('meta.backup')!==today()&&confirm('다음 책으로 넘어가기 전에 지금까지의 기록을 파일로 저장해 둘까요?\n(기기를 바꾸거나 기록이 지워져도 되찾을 수 있어요)'))saveFile();
+  if(!confirm('「'+t+'」 기록을 내 책장에 꽂고 새 책을 시작할까요?\n\n· 기록은 지워지지 않고 ‘내 책’ 화면의 내 책장에서 다시 볼 수 있어요.\n· 도장판과 독서 기간은 그대로 이어져요.'))return;
+  var B={id:uid(),doneAt:today()};R.BOOK_KEYS.forEach(function(k){if(S[k]!==undefined)B[k]=S[k];delete S[k]});
+  S.shelf=R.shelf(S).concat([B]);S.book={};if(B.book&&B.book.start)S.book.start=B.book.start;if(B.book&&B.book.end)S.book.end=B.book.end;save();
+  try{sessionStorage.setItem('r40tab','home');sessionStorage.setItem('r40msg','📚 「'+t+'」을(를) 내 책장에 꽂았어요. 새 책 정보를 적어 주세요!')}catch(e){}
+  setTimeout(function(){location.reload()},700)}
 function renderSheet(){$('#sheet').innerHTML='<p class="hint noprint" style="margin-top:0">📄 내 기록장 미리보기</p>'+sheetHTML()}
 function fname(ext){var p=get('profile')||{};return ('북로드_책과 함께 걷는 지혜의 숲길_'+(R.gradeLabel(p.grade)||'')+'-'+(p.cls||'')+'-'+(p.num||'')+'_'+(p.name||'이름')+'_'+today().slice(5).replace('-','')).replace(/[\\/:*?"<>|]/g,'')+ext}
 function download(name,blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},800)}
@@ -789,7 +843,13 @@ document.addEventListener('DOMContentLoaded',function(){
   var t='home';try{t=sessionStorage.getItem('r40tab')||'home'}catch(e){}show(t);
   $$('#tabs a').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();show(a.dataset.p)})});
   document.addEventListener('click',function(e){var g=e.target.closest('[data-go]');if(g){e.preventDefault();show(g.dataset.go)}
-    if(e.target.closest('#quickSave'))saveFile()});
+    if(e.target.closest('#quickSave'))saveFile();
+    if(e.target.closest('#nextBook'))nextBook();
+    var sb=e.target.closest('[data-shelf]');if(sb)openShelf(+sb.dataset.shelf)});
+  $('#shelfClose').addEventListener('click',function(){$('#shelfModal').classList.remove('on')});
+  $('#shelfModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('on')});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')$('#shelfModal').classList.remove('on')});
+  try{var msg=sessionStorage.getItem('r40msg');if(msg){sessionStorage.removeItem('r40msg');setTimeout(function(){toast(msg)},300)}}catch(e){}
   window.addEventListener('hashchange',function(){if(R.cfgFromUrl(location.href))location.reload()});
   $('#calPrev').addEventListener('click',function(){calYM--;renderCal()});
   $('#calNext').addEventListener('click',function(){calYM++;renderCal()});
@@ -808,7 +868,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(to<from){toast('마지막 쪽은 시작 쪽('+from+'쪽)보다 커야 해요');$('#lgTo').focus();return}
     if(tot&&to>tot){toast('전체 쪽수('+tot+'쪽)보다 커요. 쪽수를 확인해 주세요');return}
     if(tot)pct=Math.min(100,Math.round(to/tot*100));
-    var first=!arr('logs').some(function(l){return l.date===d});
+    var first=!R.allLogs(S).some(function(l){return l.date===d});
     addItem('logs',{date:d,from:from,to:to,pos:$('#lgPos').value.trim(),pct:pct,memo:$('#lgMemo').value.trim(),mood:$('#lgMood').value});
     $('#lgPos').value='';$('#lgTo').value='';$('#lgMemo').value='';$('#lgFrom').value=R.lastPage(S)+1;renderDuring();
     if(tot&&to>=tot)setTimeout(function(){toast('🎉 끝까지 다 읽었어요! ③ 읽은 후로 가 볼까요?')},2100);

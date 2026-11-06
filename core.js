@@ -2,11 +2,11 @@
    서버·데이터베이스 없음. 학급 설정은 링크(#c=…) 안에, 학생 기록은 학생 브라우저에만 저장된다. */
 (function(g){
 'use strict';
-var R={VERSION:'1.5',NAME:'북로드',SUB:'책과 함께 걷는 지혜의 숲길'};
+var R={VERSION:'1.6',NAME:'북로드',SUB:'책과 함께 걷는 지혜의 숲길'};
 
 /* 학급 설정 기본값 */
 R.DEF={v:1,id:'',school:'',cls:'',title:'북로드',days:40,start:'',end:'',checks:[10,20,30],
-  elib:'https://lib.goe.go.kr/elib/index.do',upload:'',uploadLabel:'제출 폴더',agent:'',agentLabel:'AI 독후활동 코치',mode:'free',acts:[],count:1};
+  elib:'https://lib.goe.go.kr/elib/index.do',upload:'',uploadLabel:'제출 폴더',agent:'',agentLabel:'AI 독후활동 코치',mode:'free',acts:[],count:1,multi:true,actFor:'one'};
 R.full=function(c){var o={};for(var k in R.DEF)o[k]=R.DEF[k];if(c)for(var j in c)if(c[j]!=null)o[j]=c[j];return o};
 
 /* ───────── 독후활동 ─────────
@@ -103,6 +103,14 @@ R.startDate=function(S,c){var s=g_(S,'book.start');if(s)return s;if(c.start)retu
 /* 쪽수: 지금까지 읽은 마지막 쪽 */
 R.lastPage=function(S){return Math.max.apply(null,[0].concat(arr(S,'logs').map(function(l){return +l.to||0})))};
 R.pageText=function(l){return (+l.to?(+l.from&&+l.from!==+l.to?l.from+'~':'')+l.to+'쪽':'')+(l.pos?(+l.to?' · ':'')+l.pos:'')};
+/* 여러 권 읽기: 다 읽은 책은 S.shelf(내 책장)에 한 권씩 쌓인다. 도장판(기간)은 하나로 이어진다. */
+R.BOOK_KEYS=['book','pre','logs','quotes','qs','post','act','coach','fin','self'];
+R.shelf=function(S){return arr(S,'shelf')};
+R.allLogs=function(S){var a=[];R.shelf(S).forEach(function(b){a=a.concat(arr(b,'logs'))});return a.concat(arr(S,'logs'))};
+R.bookDone=function(B){var t=+g_(B,'book.pages')||0;return !!t&&R.lastPage(B)>=t};
+R.started=function(B){return filled(g_(B,'book.title'))||arr(B,'logs').length>0};
+R.canNext=function(S,c){return c.multi!==false&&R.bookDone(S)&&R.st.post(S)===2};
+R.actRep=function(S,c){if(c.actFor==='each')return null;var sh=R.shelf(S);for(var i=0;i<sh.length;i++)if(R.st.actOwn(sh[i],c)===2)return sh[i];return null};
 R.days=function(c){return Math.max(1,+c.days||40)};
 /* 기간: 시작일 ~ 끝나는 날(학생 > 선생님 > 시작일+기본 일수) */
 R.endDate=function(S,c){var s=R.startDate(S,c),e=g_(S,'book.end')||c.end;if(!e||e<s)e=R.addD(s,R.days(c)-1);return e};
@@ -127,15 +135,18 @@ R.st={
  pre:function(S){var n=['pre.why','pre.predict','pre.wonder','pre.daily'].filter(function(k){return filled(g_(S,k))}).length+(arr(S,'pre.chips').length?1:0);return n>=4?2:n?1:0},
  during:function(S){var n=arr(S,'logs').length;return n>=10?2:n?1:0},
  post:function(S){var ks=R.postKeys(S),n=ks.filter(function(k){return filled(g_(S,k))}).length;return n===ks.length?2:n?1:0},
- act:function(S,c){var ch=R.actChosen(S,c);if(!ch.length)return 0;var d=ch.filter(function(a){return R.actState(S,a)===2}).length;return d>=R.actNeed(S,c)?2:1},
+ actOwn:function(S,c){var ch=R.actChosen(S,c);if(!ch.length)return 0;var d=ch.filter(function(a){return R.actState(S,a)===2}).length;return d>=R.actNeed(S,c)?2:1},
+ act:function(S,c){var v=R.st.actOwn(S,c);return v===2||!R.actRep(S,c)?v:2},
  fin:function(S){var star=g_(S,'fin.star'),one=filled(g_(S,'fin.oneline')),self=g_(S,'self')||{};return star&&one&&Object.keys(self).length===R.RUB.length?2:(star||one)?1:0}
 };
 R.summary=function(S,c){var logs=arr(S,'logs'),s=R.startDate(S,c),D=R.span(S,c),dates={};
-  logs.forEach(function(l){var k=R.diff(s,l.date);if(k>=0&&k<D)dates[l.date]=1});
+  R.allLogs(S).forEach(function(l){var k=R.diff(s,l.date);if(k>=0&&k<D)dates[l.date]=1});
   var tot=+g_(S,'book.pages')||0;
   var pct=Math.min(100,Math.max.apply(null,[0].concat(logs.map(function(l){return (tot&&+l.to)?Math.round(+l.to/tot*100):(+l.pct||0)}))));
-  var ch=R.actChosen(S,c);
-  return {start:s,end:R.endDate(S,c),span:D,logs:logs.length,logDays:Object.keys(dates).length,pct:pct,quotes:arr(S,'quotes').length,qs:arr(S,'qs').length,
+  var ch=R.actChosen(S,c),sh=R.shelf(S),rep=R.actRep(S,c);
+  var books=sh.length+(R.started(S)?1:0),done=sh.length+(R.bookDone(S)?1:0),pagesAll=sh.reduce(function(t,b){return t+R.lastPage(b)},0)+R.lastPage(S);
+  var titles=sh.map(function(b){return g_(b,'book.title')||'제목 없음'}).concat(R.started(S)?[g_(S,'book.title')||'제목 없음']:[]);
+  return {books:books,done:done,pagesAll:pagesAll,titles:titles,actRep:rep?(g_(rep,'book.title')||'제목 없음'):'',start:s,end:R.endDate(S,c),span:D,logs:logs.length,logDays:Object.keys(dates).length,pct:pct,quotes:arr(S,'quotes').length,qs:arr(S,'qs').length,
     actDone:ch.filter(function(a){return R.actState(S,a)===2}).length,actNeed:R.actNeed(S,c),actNames:ch.map(function(a){return a.name}),
     pre:R.st.pre(S,c),during:R.st.during(S,c),post:R.st.post(S,c),act:R.st.act(S,c),fin:R.st.fin(S,c),star:+(g_(S,'fin.star')||0)}};
 

@@ -70,7 +70,7 @@ tr:hover td{background:#faf8f2}
   </div>
 </main>
 
-<script src="core.js?v=1.5"></script>
+<script src="core.js?v=1.6"></script>
 <script>
 (function(){
 'use strict';
@@ -78,7 +78,7 @@ var R=R40,ROWS=[],SORT={k:'no',d:1};
 function $(s){return document.querySelector(s)}
 var esc=R.esc;
 var COLS=[
- ['no','학년-반-번호'],['name','이름'],['title','책 제목'],['genre','갈래'],['day','저장 시점'],['logs','일지'],['logDays','기록일'],['pct','진행률'],['quotes','구절'],
+ ['no','학년-반-번호'],['name','이름'],['title','책 제목'],['books','권'],['pagesAll','총 쪽'],['genre','갈래'],['day','저장 시점'],['logs','일지'],['logDays','기록일'],['pct','진행률'],['quotes','구절'],
  ['pre','①'],['during','②'],['post','③'],['act','④ 활동'],['fin','⑤'],['star','별점'],['cls','학급'],['flag','확인']];
 
 function parse(name,text){var m=text.match(/<script type="application\/json" id="rdata">([\s\S]*?)<\/script>/);if(!m)return null;
@@ -86,7 +86,7 @@ function parse(name,text){var m=text.match(/<script type="application\/json" id=
   var S=d.S||d,c=R.full(d.cfg||{}),p=S.profile||{},b=S.book||{},sm=R.summary(S,c);
   var flags=[];if(d.cfg&&d.cfgOk===false)flags.push('링크 변경');if(d.linked===false)flags.push('체험 모드');
   return {file:name,text:text,savedAt:d.savedAt||'',classId:(d.cfg&&d.cfg.id)||'',cls:[c.school,c.cls].filter(Boolean).join(' '),
-   grade:p.grade||'',clsNo:p.cls||'',num:p.num||'',name:p.name||'(이름 없음)',title:b.title||'',genre:b.genre==='fic'?'소설':b.genre==='non'?'비문학':'',
+   grade:p.grade||'',clsNo:p.cls||'',num:p.num||'',name:p.name||'(이름 없음)',title:sm.titles.length>1?sm.titles.join(' → '):(b.title||''),books:sm.books,pagesAll:sm.pagesAll,genre:b.genre==='fic'?'소설':b.genre==='non'?'비문학':'',
    no:(+p.grade||0)*10000+(+p.cls||0)*100+(+p.num||0),day:d.day||'',sm:sm,logs:sm.logs,logDays:sm.logDays,pct:sm.pct,quotes:sm.quotes,
    pre:sm.pre,during:sm.during,post:sm.post,act:sm.act,fin:sm.fin,star:sm.star,flags:flags,flag:flags.join(', ')}}
 function key(r){return [r.classId,r.grade,r.clsNo,r.num,r.name].join('|')}
@@ -96,10 +96,10 @@ function render(){var rows=visible();
   rows.sort(function(a,b){var x=a[SORT.k],y=b[SORT.k];if(typeof x==='string'||typeof y==='string'){x=String(x);y=String(y);return x.localeCompare(y,'ko')*SORT.d}return ((+x||0)-(+y||0))*SORT.d});
   var ids={};rows.forEach(function(r){if(r.classId)ids[r.classId]=1});var multi=Object.keys(ids).length>1;
   $('#tbl').innerHTML='<tr>'+COLS.map(function(c){return '<th class="'+(c[0].length<6&&c[1].length<3?'c':'')+'" data-k="'+c[0]+'">'+c[1]+(SORT.k===c[0]?(SORT.d>0?' ▲':' ▼'):'')+'</th>'}).join('')+'</tr>'+
-   rows.map(function(r){var i=ROWS.indexOf(r);return '<tr><td>'+esc(R.gradeLabel(r.grade)+'-'+r.clsNo+'-'+r.num)+'</td><td><a href="#" data-open="'+i+'">'+esc(r.name)+'</a></td><td>'+esc(r.title)+'</td><td>'+esc(r.genre)+'</td>'+
+   rows.map(function(r){var i=ROWS.indexOf(r);return '<tr><td>'+esc(R.gradeLabel(r.grade)+'-'+r.clsNo+'-'+r.num)+'</td><td><a href="#" data-open="'+i+'">'+esc(r.name)+'</a></td><td>'+esc(r.title)+'</td><td class="c">'+r.books+'</td><td class="c">'+r.pagesAll+'</td><td>'+esc(r.genre)+'</td>'+
     '<td class="hint">'+(r.savedAt?esc(new Date(r.savedAt).toLocaleDateString('ko-KR'))+(r.day?' ('+esc(r.day)+'일째)':''):'')+'</td>'+
     '<td class="c">'+r.logs+'</td><td class="c">'+r.logDays+'</td><td><span class="mini"><i style="width:'+r.pct+'%"></i></span>'+r.pct+'%</td><td class="c">'+r.quotes+'</td>'+
-    '<td class="c">'+mark(r.pre)+'</td><td class="c">'+mark(r.during)+'</td><td class="c">'+mark(r.post)+'</td><td class="c">'+mark(r.act)+' '+r.sm.actDone+'/'+r.sm.actNeed+'</td><td class="c">'+mark(r.fin)+'</td>'+
+    '<td class="c">'+mark(r.pre)+'</td><td class="c">'+mark(r.during)+'</td><td class="c">'+mark(r.post)+'</td><td class="c">'+mark(r.act)+' '+(r.sm.actRep&&r.sm.actDone<r.sm.actNeed?'대표 책':r.sm.actDone+'/'+r.sm.actNeed)+'</td><td class="c">'+mark(r.fin)+'</td>'+
     '<td>'+(r.star?'★'.repeat(r.star):'')+'</td><td class="hint">'+esc(r.cls)+'</td><td class="warn">'+esc(r.flag)+(multi?'':'')+'</td></tr>'}).join('');
   var n=rows.length,avg=function(k){return n?Math.round(rows.reduce(function(s,r){return s+(+r[k]||0)},0)/n):0};
   $('#sum').innerHTML='<div><b>'+n+'</b>명</div><div>평균 진행률 <b>'+avg('pct')+'%</b></div><div>평균 기록일 <b>'+avg('logDays')+'</b>일</div><div>독후활동 완료 <b>'+rows.filter(function(r){return r.act===2}).length+'</b>명</div>'+(multi?'<div class="warn">⚠ 여러 학급 링크의 파일이 섞여 있어요</div>':'');
@@ -107,9 +107,9 @@ function render(){var rows=visible();
 function addFiles(list){var arr=[].slice.call(list).filter(function(f){return /\.html?$/i.test(f.name)}),left=arr.length,bad=0;if(!left)return;
   arr.forEach(function(f){var rd=new FileReader();rd.onload=function(){var r=parse(f.name,rd.result);if(r){ROWS=ROWS.filter(function(x){return !(x.file===r.file&&x.savedAt===r.savedAt)});ROWS.push(r)}else bad++;
     if(--left===0){render();if(bad)alert(bad+'개 파일은 북로드 기록장 파일이 아니어서 건너뛰었어요.')}};rd.readAsText(f)})}
-function csv(){var rows=visible(),head=['학년','반','번호','이름','책 제목','갈래','저장일','저장 시점(일째)','일지 횟수','기록일','진행률(%)','구절 수','질문 수','읽기 전','읽는 중','읽은 후','독후활동','완료 활동 수','필요 활동 수','활동 목록','마무리','별점','학급','확인'];
+function csv(){var rows=visible(),head=['학년','반','번호','이름','책 제목','읽은 책 수','총 읽은 쪽','갈래','저장일','저장 시점(일째)','일지 횟수','기록일','진행률(%)','구절 수','질문 수','읽기 전','읽는 중','읽은 후','독후활동','완료 활동 수','필요 활동 수','활동 목록','마무리','별점','학급','확인'];
   var st=function(v){return v===2?'완료':v===1?'작성 중':'시작 전'};
-  var lines=[head].concat(rows.map(function(r){return [R.gradeLabel(r.grade),r.clsNo,r.num,r.name,r.title,r.genre,r.savedAt?new Date(r.savedAt).toLocaleDateString('ko-KR'):'',r.day,r.logs,r.logDays,r.pct,r.quotes,r.sm.qs,st(r.pre),st(r.during),st(r.post),st(r.act),r.sm.actDone,r.sm.actNeed,r.sm.actNames.join(' / '),st(r.fin),r.star||'',r.cls,r.flag]}));
+  var lines=[head].concat(rows.map(function(r){return [R.gradeLabel(r.grade),r.clsNo,r.num,r.name,r.title,r.books,r.pagesAll,r.genre,r.savedAt?new Date(r.savedAt).toLocaleDateString('ko-KR'):'',r.day,r.logs,r.logDays,r.pct,r.quotes,r.sm.qs,st(r.pre),st(r.during),st(r.post),st(r.act),r.sm.actDone,r.sm.actNeed,r.sm.actNames.join(' / '),st(r.fin),r.star||'',r.cls,r.flag]}));
   var s='﻿'+lines.map(function(l){return l.map(function(v){v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')}).join('\r\n');
   var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));a.download='북로드_현황_'+R.today()+'.csv';a.click()}
 
