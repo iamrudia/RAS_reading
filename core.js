@@ -2,7 +2,7 @@
    서버·데이터베이스 없음. 학급 설정은 링크(#c=…) 안에, 학생 기록은 학생 브라우저에만 저장된다. */
 (function(g){
 'use strict';
-var R={VERSION:'2.1',NAME:'북로드',SUB:'책과 함께 걷는 지혜의 숲길'};
+var R={VERSION:'2.2',NAME:'북로드',SUB:'책과 함께 걷는 지혜의 숲길'};
 
 /* 학급 설정 기본값 */
 R.DEF={v:1,id:'',school:'',cls:'',title:'북로드',days:40,start:'',end:'',checks:[10,20,30],
@@ -85,6 +85,7 @@ R.dateField=function(el,onChange,opt){
   b.addEventListener('click',function(){var mn=opt&&opt.min;p.min=(typeof mn==='function'?mn():mn)||'2000-01-01';p.value=R.parseDate(el.value)||(p.min>R.today()?p.min:R.today());try{p.showPicker()}catch(e){p.focus();p.click()}});
   p.addEventListener('change',function(){if(!p.value)return;el.value=p.value;upd()});
 };
+R.okUrl=function(u){return /^https:\/\/[^\s"<>]+$/i.test(String(u||'').trim())};
 R.uid=function(n){var c='abcdefghijkmnpqrstuvwxyz23456789',s='';for(var i=0;i<(n||6);i++)s+=c[Math.floor(Math.random()*c.length)];return s};
 
 /* ───────── 설정 ↔ 링크 ───────── */
