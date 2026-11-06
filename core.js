@@ -2,7 +2,7 @@
    서버·데이터베이스 없음. 학급 설정은 링크(#c=…) 안에, 학생 기록은 학생 브라우저에만 저장된다. */
 (function(g){
 'use strict';
-var R={VERSION:'1.8',NAME:'북로드',SUB:'책과 함께 걷는 지혜의 숲길'};
+var R={VERSION:'1.9',NAME:'북로드',SUB:'책과 함께 걷는 지혜의 숲길'};
 
 /* 학급 설정 기본값 */
 R.DEF={v:1,id:'',school:'',cls:'',title:'북로드',days:40,start:'',end:'',checks:[10,20,30],
@@ -32,6 +32,7 @@ R.ACTS=[
  {id:'drawing',cat:'show',g:'both',ic:'🖼',name:'그림으로 표현하기',desc:'책의 느낌을 한 장의 그림으로',f:[['img','img','나의 그림'],['title','text','그림 제목'],['desc','area','그림 설명 (무엇을, 왜 이렇게 표현했나)']]},
  {id:'ad',cat:'show',g:'both',ic:'📣',name:'책 광고 만들기',desc:'이 책을 알리는 광고',f:[['target','text','누구에게 광고하나요? (대상 독자)'],['info','text','광고에 넣을 정보 (책 이름, 지은이, 출판사, 펴낸 해)'],['quote','area','마음에 드는 서평이나 작가의 말'],['copy','text','광고 문구 (카피)'],['img','img','광고 그림 (선택)'],['body','area','광고 글']]},
  {id:'quiz',cat:'show',g:'both',ic:'🧩',name:'퀴즈 만들기',desc:'친구들이 풀 수 있는 퀴즈',f:[['kind','chips','퀴즈 종류 (여러 개 골라도 돼요)','',['O·X 퀴즈','선택형','단답형','스무고개','십자말풀이','빈칸 채우기']],['q','qa','문제와 정답','',5]]},
+ {id:'card',cat:'show',g:'both',ic:'🃏',name:'30초 책 소개 카드',desc:'책 장터에 놓을 표지 카드',f:[['sum','area','한 문장으로 말하면','소설: 누가 / 무엇을 원했는데 / 그러나 (문제) / 그래서 / 결국 …  비문학: 이 책은 ___을 말한다. 그 근거는 ___. 나는 ___라고 생각한다.',3],['who','text','이런 친구에게 추천해요','예: 진로 때문에 고민하는 친구, 반전 있는 이야기를 좋아하는 친구'],['q','text','함께 나눌 질문','비워 두면 ③ 읽은 후의 ‘함께 나눌 질문’이 들어가요'],['key','text','이 책을 세 단어로 (선택)','쉼표로 나누어 써요. 예: 우정, 용기, 반전']]},
  {id:'interview',cat:'show',g:'both',ic:'🎤',name:'가상 인터뷰',desc:'인물이나 작가를 인터뷰하기',f:[['who','text','인터뷰 대상 (작품 속 인물 또는 작가)'],['q','qa','인터뷰 질문과 대답','작품의 주제와 어울리는 질문 5개와, 그 사람이 했을 법한 대답을 써요.',5]]}
 ];
 R.actById=function(id){for(var i=0;i<R.ACTS.length;i++)if(R.ACTS[i].id===id)return R.ACTS[i]};
@@ -150,6 +151,32 @@ R.summary=function(S,c){var logs=arr(S,'logs'),s=R.startDate(S,c),D=R.span(S,c),
     actDone:ch.filter(function(a){return R.actState(S,a)===2}).length,actNeed:R.actNeed(S,c),actNames:ch.map(function(a){return a.name}),
     pre:R.st.pre(S,c),during:R.st.during(S,c),post:R.st.post(S,c),act:R.st.act(S,c),fin:R.st.fin(S,c),star:+(g_(S,'fin.star')||0)}};
 
+
+/* ───────── 30초 책 소개 카드 (책 장터용) ─────────
+   학생 화면(한 장 인쇄)과 모아보기(반 전체, A4에 4장)가 함께 쓴다. */
+R.cardBook=function(S){if(R.started(S))return S;var sh=R.shelf(S);if(!sh.length)return S;var B={};for(var k in S)if(R.BOOK_KEYS.indexOf(k)<0)B[k]=S[k];var L=sh[sh.length-1];R.BOOK_KEYS.forEach(function(k){if(L[k]!==undefined)B[k]=L[k]});return B};
+R.CARD_CSS="@page{size:A4;margin:10mm}*{box-sizing:border-box}body{margin:0;font-family:'Pretendard','Noto Sans KR','Malgun Gothic',sans-serif;color:#1f1c2e;-webkit-print-color-adjust:exact;print-color-adjust:exact}"+
+ ".cards{display:grid;grid-template-columns:1fr 1fr;gap:6mm}.one .cards{grid-template-columns:1fr;max-width:105mm;margin:8mm auto}"+
+ ".bc{height:132mm;border:2px solid #3b34a8;border-radius:5mm;overflow:hidden;display:flex;flex-direction:column;break-inside:avoid;background:#fffdf9}"+
+ ".bc .top{display:flex;gap:4mm;padding:5mm 5mm 3mm;background:linear-gradient(135deg,#2b2588,#4a41c4);color:#fff}"+
+ ".bc .cv{width:30mm;height:42mm;flex:none;border-radius:2mm;background:#fff center/cover no-repeat;box-shadow:0 1mm 2mm rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;text-align:center;font-size:9pt;color:#3b34a8;padding:2mm;font-weight:700}"+
+ ".bc .ti{min-width:0;display:flex;flex-direction:column;gap:1mm}.bc .eb{font-size:7pt;letter-spacing:.12em;color:#ffd58a;font-weight:700}"+
+ ".bc h2{margin:0;font-family:'Noto Serif KR',serif;font-size:14pt;line-height:1.3}.bc .au{font-size:9pt;opacity:.85}.bc .st{color:#ffd58a;font-size:11pt;letter-spacing:1px}.bc .gn{font-size:8pt;opacity:.8}"+
+ ".bc .bd{padding:3.5mm 5mm 2mm;display:flex;flex-direction:column;gap:2.4mm;flex:1;min-height:0}.bc .k{font-size:7.5pt;font-weight:700;color:#3b34a8;letter-spacing:.04em}"+
+ ".bc .v{font-size:9.5pt;line-height:1.45;margin-top:.5mm;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4}.bc .q .v{font-family:'Noto Serif KR',serif;font-size:10.5pt;-webkit-line-clamp:3}"+
+ ".bc .kw{display:flex;gap:1.5mm;flex-wrap:wrap}.bc .kw span{background:#ebe9fa;color:#2b2588;border-radius:9mm;padding:.6mm 2.6mm;font-size:8.5pt;font-weight:700}"+
+ ".bc .ft{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;border-top:1px dashed #cfc8ef;padding:2mm 5mm 3mm;font-size:8pt;color:#6a6578}.bc .like{border:1.5px dashed #c27c1a;color:#c27c1a;border-radius:2mm;padding:1mm 2.5mm;font-weight:700}"+
+ ".blank{color:#b0aac0}@media screen{body{background:#f6f3ec;padding:6mm}}";
+R.cardHTML=function(S,c){var B=R.cardBook(S),e=R.esc,b=B.book||{},p=B.profile||{},d=g_(B,'act.data.card')||{},g=R.genre(B),star=+(g_(B,'fin.star')||0);
+  var q=d.q||g_(B,'post.share')||'',kw=String(d.key||'').split(/[,，·\s]+/).filter(Boolean).slice(0,4);
+  function blk(cls,k,v){return '<div class="'+cls+'"><div class="k">'+k+'</div><div class="v">'+(R.filled(v)?e(v).replace(/\n/g,'<br>'):'<span class="blank">(아직 쓰지 않았어요)</span>')+'</div></div>'}
+  return '<div class="bc"><div class="top"><div class="cv"'+(b.cover?' style="background-image:url('+b.cover+')"':'')+'>'+(b.cover?'':e(b.title||'표지'))+'</div>'+
+   '<div class="ti"><span class="eb">📚 BOOK ROAD · 30초 책 소개</span><h2>'+e(b.title||'제목 없음')+'</h2><span class="au">'+e(b.author||'')+(b.pub?' · '+e(b.pub):'')+'</span>'+
+   (star?'<span class="st">'+'★★★★★'.slice(0,star)+'<span style="opacity:.35">'+'★★★★★'.slice(0,5-star)+'</span></span>':'')+'<span class="gn">'+(g==='fic'?'소설·이야기':g==='non'?'비문학':'')+(b.pages?' · '+e(b.pages)+'쪽':'')+'</span></div></div>'+
+   '<div class="bd">'+blk('s','한 문장으로 말하면',d.sum)+blk('w','이런 친구에게 추천해요',d.who)+blk('q','함께 나눌 질문',q?'Q. '+q:'')+
+   (kw.length?'<div><div class="k">이 책을 세 단어로</div><div class="kw" style="margin-top:1mm">'+kw.map(function(w){return '<span>#'+e(w)+'</span>'}).join('')+'</div></div>':'')+'</div>'+
+   '<div class="ft"><span>추천한 사람: '+e([R.gradeLabel(p.grade),p.cls&&p.cls+'반',p.name].filter(Boolean).join(' ')||'')+'</span><span class="like">읽고 싶어요 ☐</span></div></div>'};
+R.cardDoc=function(inner,one){return '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>북로드 책 소개 카드</title><style>'+R.CARD_CSS+'</style></head><body class="'+(one?'one':'')+'"><div class="cards">'+inner+'</div><script>window.onload=function(){setTimeout(function(){window.print()},400)}<\/script></body></html>'};
 
 /* 책 명언 50 — 순서를 섞어 날마다 하나씩 (같은 날에는 누구에게나 같은 명언) */
 R.QUOTES=[["하루라도 책을 읽지 않으면 입 안에 가시가 돋는다.", "안중근", "뤼순 감옥 유묵"], ["사내라면 모름지기 다섯 수레의 책을 읽어야 한다.", "두보", ""], ["책을 백 번 읽으면 뜻이 저절로 드러난다.", "『삼국지』 위지 동우전", ""], ["책 속에 저절로 황금 집이 있다.", "송 진종", "「권학문」"], ["책을 읽을 때는 마음·눈·입, 세 가지가 함께 가야 한다.", "주희", "독서삼도"], ["독서야말로 사람이 할 수 있는 가장 깨끗한 일이다.", "정약용", "두 아들에게 보낸 편지"], ["사흘 동안 책을 읽지 않으면 말에 맛이 없고 얼굴이 밉살스러워진다.", "황정견", ""], ["사람은 책을 만들고, 책은 사람을 만든다.", "신용호", "교보문고 창립자"], ["책 없는 방은 영혼 없는 몸과 같다.", "키케로", "전해짐"], ["독서는 사람을 풍요롭게 하고, 토론은 재빠르게 하며, 글쓰기는 정확하게 한다.", "프랜시스 베이컨", "「학문에 대하여」"], ["어떤 책은 맛만 보고, 어떤 책은 삼키고, 몇몇 책은 씹어서 소화해야 한다.", "프랜시스 베이컨", "「학문에 대하여」"], ["좋은 책을 읽는 것은 지난 시대의 가장 훌륭한 사람들과 대화하는 것이다.", "르네 데카르트", "『방법서설』"], ["독서와 정신의 관계는 운동과 몸의 관계와 같다.", "조지프 애디슨", ""], ["좋은 책은 위대한 정신의 소중한 생명의 피다.", "존 밀턴", "『아레오파기티카』"], ["돈이 조금 생기면 책을 산다. 남는 돈이 있으면 음식과 옷을 산다.", "에라스뮈스", ""], ["나는 책 없이는 살 수 없다.", "토머스 제퍼슨", "존 애덤스에게 보낸 편지"], ["책은 세상의 소중한 재산이며, 세대와 나라가 물려받을 유산이다.", "헨리 데이비드 소로", "『월든』"], ["한 권의 책을 읽은 날부터 삶의 새 시대를 맞은 사람이 얼마나 많은가.", "헨리 데이비드 소로", "『월든』"], ["살기 위해 읽어라.", "귀스타브 플로베르", "편지"], ["책은 시간이라는 큰 바다에 세운 등대다.", "에드윈 퍼시 휘플", ""], ["책은 가장 조용하고 변함없는 친구다.", "찰스 W. 엘리엇", ""], ["읽는 법을 배우면 영원히 자유로워진다.", "프레더릭 더글러스", "전해짐"], ["책은 우리 안의 얼어붙은 바다를 깨는 도끼여야 한다.", "프란츠 카프카", "오스카 폴락에게 보낸 편지"], ["나는 늘 천국이 도서관 같은 곳일 거라고 생각했다.", "호르헤 루이스 보르헤스", ""], ["책은 들고 다닐 수 있는 특별한 마법이다.", "스티븐 킹", "『유혹하는 글쓰기』"], ["책을 읽는 사람은 죽기 전에 천 번의 삶을 산다. 읽지 않는 사람은 단 한 번만 산다.", "조지 R. R. 마틴", "『드래곤과의 춤』"], ["책은 거울이다. 이미 내 안에 있는 것만 그 속에서 보인다.", "카를로스 루이스 사폰", "『바람의 그림자』"], ["모두가 읽는 책만 읽으면, 모두가 하는 생각만 하게 된다.", "무라카미 하루키", "『노르웨이의 숲』"], ["고전이란 모두가 칭찬하지만 아무도 읽지 않는 책이다.", "마크 트웨인", "『적도를 따라서』"], ["우리는 혼자가 아니라는 것을 알기 위해 읽는다.", "윌리엄 니컬슨", "『섀도우랜드』"], ["내 마음에 들 만큼 큰 찻잔도, 긴 책도 세상에는 없다.", "C. S. 루이스", ""], ["열 살에 읽을 가치가 없는 책은 쉰 살에도 읽을 가치가 없다.", "C. S. 루이스", ""], ["말하기 전에 생각하라. 생각하기 전에 읽어라.", "프랜 레보위츠", ""], ["우리를 먼 곳으로 데려가는 데 책만 한 배는 없다.", "에밀리 디킨슨", ""], ["책은 비행기이고, 기차이고, 길이다.", "애나 퀸들런", "『독서가 어떻게 나의 인생을 바꾸었나』"], ["책은 발을 움직이지 않고도 여행하게 해 준다.", "줌파 라히리", "『이름 뒤에 숨은 사랑』"], ["독서는 대화다. 모든 책은 말을 하지만, 좋은 책은 귀도 기울인다.", "마크 해던", ""], ["책은 손에 쥘 수 있는 꿈이다.", "닐 게이먼", ""], ["읽어야 할 때가 아니라 읽고 싶어서 읽는 것이 훗날의 나를 만든다.", "오스카 와일드", "전해짐"], ["책을 불태우는 것보다 더 나쁜 범죄가 있다. 책을 읽지 않는 것이다.", "이오시프 브로드스키", ""], ["그녀에게 세상은 읽기만 하면 되는 것이었다.", "베티 스미스", "『나를 찾아가는 길』"], ["읽고 싶은 책이 아직 쓰이지 않았다면, 네가 써야 한다.", "토니 모리슨", ""], ["많이 읽을수록 더 많이 알게 되고, 많이 배울수록 더 많은 곳에 가게 된다.", "닥터 수스", "『눈 감고도 읽을 수 있어!』"], ["한 명의 어린이, 한 명의 교사, 한 권의 책, 한 자루의 펜이 세상을 바꿀 수 있다.", "말랄라 유사프자이", "2013년 유엔 연설"], ["책은 나에게 개인적 자유로 가는 통행증이었다.", "오프라 윈프리", ""], ["문학은 나의 유토피아다.", "헬렌 켈러", ""], ["읽고, 읽고, 또 읽어라. 무엇이든 읽어라.", "윌리엄 포크너", ""], ["도서관은 돈 없는 시절을 버티게 해 주지만, 돈은 도서관 없는 시절을 버티게 해 주지 못한다.", "앤 허버트", ""], ["오늘 책을 읽는 사람이 내일의 리더가 된다.", "마거릿 풀러", "전해짐"], ["책 속에는 보물섬 해적들의 보물보다 더 많은 보물이 있다.", "월트 디즈니", "전해짐"]];

@@ -57,6 +57,7 @@ tr:hover td{background:#faf8f2}
       <span style="flex:1"></span>
       <label class="hint"><input type="checkbox" id="allVer"> 같은 학생의 이전 파일도 보기</label>
       <button class="btn ghost" id="clear">비우기</button>
+      <button class="btn" id="cards" style="background:#3b34a8">🃏 책 장터 카드 인쇄</button>
       <button class="btn" id="csv">⬇ 엑셀(CSV) 저장</button>
     </div>
     <div class="wrap"><table id="tbl"></table></div>
@@ -70,7 +71,7 @@ tr:hover td{background:#faf8f2}
   </div>
 </main>
 
-<script src="core.js?v=1.8"></script>
+<script src="core.js?v=1.9"></script>
 <script>
 (function(){
 'use strict';
@@ -85,7 +86,7 @@ function parse(name,text){var m=text.match(/<script type="application\/json" id=
   var d;try{d=JSON.parse(m[1])}catch(e){return null}
   var S=d.S||d,c=R.full(d.cfg||{}),p=S.profile||{},b=S.book||{},sm=R.summary(S,c);
   var flags=[];if(d.cfg&&d.cfgOk===false)flags.push('링크 변경');if(d.linked===false)flags.push('체험 모드');
-  return {file:name,text:text,savedAt:d.savedAt||'',classId:(d.cfg&&d.cfg.id)||'',cls:[c.school,c.cls].filter(Boolean).join(' '),
+  return {S:S,c:c,file:name,text:text,savedAt:d.savedAt||'',classId:(d.cfg&&d.cfg.id)||'',cls:[c.school,c.cls].filter(Boolean).join(' '),
    grade:p.grade||'',clsNo:p.cls||'',num:p.num||'',name:p.name||'(이름 없음)',title:sm.titles.length>1?sm.titles.join(' → '):(b.title||''),books:sm.books,pagesAll:sm.pagesAll,genre:b.genre==='fic'?'소설':b.genre==='non'?'비문학':'',
    no:(+p.grade||0)*10000+(+p.cls||0)*100+(+p.num||0),day:d.day||'',sm:sm,logs:sm.logs,logDays:sm.logDays,pct:sm.pct,quotes:sm.quotes,
    pre:sm.pre,during:sm.during,post:sm.post,act:sm.act,fin:sm.fin,star:sm.star,flags:flags,flag:flags.join(', ')}}
@@ -124,6 +125,9 @@ document.addEventListener('DOMContentLoaded',function(){
   $('#allVer').addEventListener('change',render);
   $('#clear').addEventListener('click',function(){ROWS=[];render()});
   $('#csv').addEventListener('click',csv);
+  $('#cards').addEventListener('click',function(){var rows=visible().sort(function(a,b){return a.no-b.no});if(!rows.length)return;
+    var w=window.open('','_blank');if(!w){alert('팝업이 막혀 있어요. 팝업을 허용해 주세요.');return}
+    w.document.write(R.cardDoc(rows.map(function(r){return R.cardHTML(r.S,r.c)}).join(''),false));w.document.close()});
 });
 })();
 </script>

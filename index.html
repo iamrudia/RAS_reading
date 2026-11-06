@@ -175,6 +175,15 @@ h2.bk{margin-top:30px;padding:8px 14px;border-radius:10px;background:var(--teal-
 .quote .qn small{font-size:11px;color:var(--muted)}
 .quote.fade blockquote,.quote.fade .qw{opacity:0}
 @media (max-width:640px){.quote blockquote{font-size:17px}.quote .qi{display:none}}
+.coverRow{display:flex;gap:14px;align-items:center}
+#coverBox .cvimg{position:relative;width:96px;height:136px;flex:none}
+#coverBox img{width:96px;height:136px;object-fit:cover;border-radius:8px;box-shadow:0 4px 10px -4px rgba(31,28,46,.45)}
+#coverBox .x{position:absolute;top:-8px;right:-8px;background:#fff;border:1px solid var(--line);border-radius:50%;width:26px;height:26px}
+#coverBox label{width:96px;height:136px;flex:none;border:2px dashed #cfc8ef;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:13px;color:var(--teal);cursor:pointer;background:#fff;padding:6px}
+#coverBox label:hover{background:var(--teal-l)}
+.sbook .scov{float:right;width:46px;height:64px;object-fit:cover;border-radius:4px;margin:18px 0 4px 8px;box-shadow:0 2px 6px -2px rgba(0,0,0,.4)}
+.cardPrev{margin-top:14px;padding:14px;border-radius:14px;background:var(--paper);border:1px dashed var(--line)}
+.cardPrev .bc{max-width:400px;margin:0 auto}
 /* ───── 숲 디자인 ───── */
 .hdrart{flex:1 1 300px;min-width:0;max-width:340px;height:60px;align-self:flex-end;margin:-6px 0 -10px;position:relative;overflow:hidden;
   background:url(forest-light.svg) repeat-x left bottom/180px 45px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
@@ -377,6 +386,8 @@ table.t td.c{text-align:center;white-space:nowrap}
         <div><label class="f">출판사</label><input type="text" data-k="book.pub"></div>
         <div><label class="f">전체 쪽수</label><input type="number" min="1" data-k="book.pages" placeholder="예: 260"><span class="hint">읽은 정도(%)를 계산할 때 써요</span></div>
       </div>
+      <label class="f">책 표지</label>
+      <div class="coverRow"><div id="coverBox"></div><p class="hint" style="margin:0">전자도서관의 책 화면에서 <b>표지를 캡처</b>해 올려요. (PC: <b>Win + Shift + S</b> / 휴대폰: 화면 캡처 후 표지만 자르기)<br>직접 그린 표지를 사진으로 찍어 올려도 좋아요. 표지는 책 장터 카드와 기록장에 들어가요.</p></div>
       <label class="f">책의 갈래</label>
       <div class="genre" id="genre">
         <button class="gbtn" data-g="fic"><b>📖 소설·이야기</b><span class="hint">인물과 사건이 있는 이야기</span></button>
@@ -563,7 +574,7 @@ table.t td.c{text-align:center;white-space:nowrap}
 <div class="toast" id="toast"></div>
 <div class="stampfx" id="stampFx" aria-live="polite"><img src="stamp.webp" alt="오늘의 독서 완료 도장"><p id="stampTxt"></p></div>
 
-<script src="core.js?v=1.8"></script>
+<script src="core.js?v=1.9"></script>
 <script>
 (function(){
 'use strict';
@@ -656,7 +667,7 @@ function renderHome(){
   $('#todayBox').className='today'+(dates[t]?'':' no');
   $('#todayBox').innerHTML=dates[t]?'<img src="stamp.webp" alt=""><span><b>오늘의 도장을 받았어요!</b><br><span class="hint">내일도 한 쪽, 이어서 걸어가요.</span></span>'
     :'<span style="font-size:26px">📖</span><span><b>아직 오늘의 도장이 없어요.</b><br><span class="hint">'+(nextCp&&n>=1?'다음 중간 점검은 '+nextCp+'일째('+md(addD(s,nextCp-1))+')예요.':'조금이라도 읽고 기록하면 도장이 찍혀요.')+'</span></span>';
-  renderCal();renderShelf();renderQuote();
+  renderCal();renderShelf();renderQuote();renderCover();
   $$('[data-st]').forEach(function(el){el.innerHTML=stTxt(st(el.dataset.st))});
   $$('.stop').forEach(function(el){var v=st(el.dataset.go);el.className='stop s'+v;el.querySelector('.pin').textContent=v===2?'✓':PAGES.indexOf(el.dataset.go)});
   $('#startHint').textContent='오늘('+R.digits8(today())+') 이후로 골라요. '+(get('book.start')?'':(CFG.start?'비워 두면 선생님이 정한 '+R.fmtD(CFG.start)+'부터 셉니다.':'비워 두면 첫 기록(오늘)부터 셉니다.'));
@@ -757,7 +768,7 @@ function renderAct(){
       return '<button class="aitem'+(on?' on':'')+(m==='fixed'?' lock':'')+'" data-act="'+a.id+'"><span class="ic">'+a.ic+'</span><b>'+esc(a.name)+'</b><span>'+esc(a.desc)+(R.GN[a.g]?' · '+R.GN[a.g]:'')+'</span></button>'}).join('')+'</div>'});
   $('#actMenu').innerHTML=h+'<p class="hint" style="margin:12px 0 0" id="actCount"></p>';
   $('#actForms').innerHTML=ch.length?ch.map(actForm).join(''):'<div class="empty">위에서 활동을 골라 보세요.</div>';
-  ch.forEach(function(a){if(a.mm)drawMM(a)});updateActCount();
+  ch.forEach(function(a){if(a.mm)drawMM(a)});updateActCount();renderCardPrev();
 }
 function updateActCount(){var ch=actChosen(),el=$('#actCount');if(el)el.textContent='고른 활동 '+ch.length+'개 · 완성 '+ch.filter(function(a){return actState(a)===2}).length+'개 / 필요 '+actNeed()+'개'}
 function actForm(a){var id=a.id;
@@ -793,7 +804,7 @@ function mmSVG(a){var c=aval(a,'center')||'',bs=[];for(var i=1;i<=5;i++){var n=a
   return s}
 function drawMM(a){var el=$('#mm-'+a.id);if(el)el.innerHTML=mmSVG(a)}
 
-function shrink(file,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var M=900,sc=Math.min(1,M/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*sc);cv.height=Math.round(im.height*sc);var c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);c.drawImage(im,0,0,cv.width,cv.height);cb(cv.toDataURL('image/jpeg',.72))};im.onerror=function(){toast('이미지를 열 수 없어요')};im.src=r.result};r.readAsDataURL(file)}
+function shrink(file,cb,MX){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var M=MX||900,sc=Math.min(1,M/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*sc);cv.height=Math.round(im.height*sc);var c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);c.drawImage(im,0,0,cv.width,cv.height);cb(cv.toDataURL('image/jpeg',.72))};im.onerror=function(){toast('이미지를 열 수 없어요')};im.src=r.result};r.readAsDataURL(file)}
 
 /* ───────── 마무리·제출 ───────── */
 function renderStars(){var v=+(get('fin.star')||0);$('#stars').innerHTML=[1,2,3,4,5].map(function(i){return '<span data-star="'+i+'" class="'+(i<=v?'on':'')+'">★</span>'}).join('')}
@@ -844,7 +855,7 @@ function sheetHTML(){var p=get('profile')||{},sh=R.shelf(S),sm=R.summary(S,CFG);
    '<p class="hint" style="margin-top:16px">저장한 때: '+new Date().toLocaleString('ko-KR')+(dayNo()>=1?' ('+dayNo()+'일째)':'')+(LINKED&&!CFG_OK?' · ⚠ 링크 변경됨':'')+'</p>'}
 function bookPart(archived){var b=get('book')||{},pre=get('pre')||{},po=get('post')||{},fn=get('fin')||{},sv=get('self')||{},g=genre(),s=startDate();
   var logs=arr('logs').slice().sort(function(x,y){return x.date<y.date?-1:x.date>y.date?1:0}),rep=CFG.actFor!=='each'&&R.st.actOwn(S,CFG)<2&&R.actRep(S,CFG);
-  var h='<table class="t"><tr><th style="width:110px">책 제목</th><td colspan="3"><b>'+esc(b.title||'')+'</b></td></tr><tr><th>지은이</th><td>'+esc(b.author||'')+'</td><th style="width:90px">출판사</th><td>'+esc(b.pub||'')+'</td></tr>'+
+  var h=(b.cover?'<img src="'+b.cover+'" alt="책 표지" style="float:right;width:120px;max-height:none;margin:0 0 10px 14px;border:0;box-shadow:0 3px 8px -3px rgba(0,0,0,.4)">':'')+'<table class="t"><tr><th style="width:110px">책 제목</th><td colspan="3"><b>'+esc(b.title||'')+'</b></td></tr><tr><th>지은이</th><td>'+esc(b.author||'')+'</td><th style="width:90px">출판사</th><td>'+esc(b.pub||'')+'</td></tr>'+
    '<tr><th>갈래</th><td>'+(g==='fic'?'소설·이야기':g==='non'?'비문학':'')+(b.pages?' · '+esc(b.pages)+'쪽':'')+'</td><th>'+(archived?'읽은 날':'독서 기간')+'</th><td>'+(archived?logRange():R.fmtD(s)+' ~ '+R.fmtD(endDate())+' ('+days()+'일)')+'</td></tr>'+
    '<tr><th>별점</th><td>'+(fn.star?'★★★★★'.slice(0,+fn.star)+'☆☆☆☆☆'.slice(0,5-fn.star):'')+'</td><th>한 줄 평</th><td>'+esc(fn.oneline||'')+'</td></tr></table>'+
    '<h3>① 읽기 전</h3>'+qa('고른 이유',arr('pre.chips').join(', ')+(pre.why?'\n'+pre.why:''))+qa('내용 예상',pre.predict)+qa('궁금한 점',pre.wonder)+qa('읽기 계획',[pre.size&&'분량: '+pre.size,pre.daily&&'하루 목표: '+pre.daily,pre.when&&'독서 약속: '+pre.when].filter(Boolean).join('\n'))+
@@ -858,11 +869,22 @@ function bookPart(archived){var b=get('book')||{},pre=get('pre')||{},po=get('pos
    '<h3>⑤ 마무리</h3>'+qa('독서 소감',fn.reflect)+qa('다음에 읽고 싶은 책',fn.next)+
    '<table class="t" style="margin-top:8px"><tr><th style="width:120px">자기평가</th><th>나의 판단</th></tr>'+RUB.map(function(r,i){return '<tr><td>'+r[0]+'</td><td>'+(sv[i]?['','잘함','보통','노력 필요'][sv[i]]+' – '+r[sv[i]]:'<span class="blank">(미선택)</span>')+'</td></tr>'}).join('')+'</table>';
   return h}
+/* ───────── 표지 ───────── */
+function renderCover(){var v=get('book.cover'),el=$('#coverBox');if(!el)return;
+  el.innerHTML=v?'<div class="cvimg"><img src="'+v+'" alt="책 표지"><button class="x" id="coverDel" title="표지 지우기">×</button></div>'
+    :'<label>📷<b>표지 올리기</b><span class="hint">눌러서 이미지 선택</span><input type="file" accept="image/*" id="coverFile" hidden></label>'}
+/* ───────── 30초 책 소개 카드 ───────── */
+var cardCssOn=false;
+function renderCardPrev(){var box=$('#af-card');if(!box)return;var pv=$('#cardPrev');
+  if(!cardCssOn){var st=document.createElement('style');st.textContent=R.CARD_CSS.replace(/@page\{[^}]*\}/,'').replace(/body\{[^}]*\}/g,'').replace(/@media screen\{body\{[^}]*\}\}/,'');document.head.appendChild(st);cardCssOn=true}
+  if(!pv){pv=document.createElement('div');pv.id='cardPrev';pv.className='cardPrev';box.appendChild(pv)}
+  pv.innerHTML='<p class="hint" style="margin:0 0 10px">🃏 카드 미리보기 — 표지는 ‘내 책’에서, 별점은 ⑤에서 넣어요.</p>'+R.cardHTML(S,CFG)+'<div class="btns" style="justify-content:center"><button class="btn teal sm" id="cardPrint">🖨 카드 인쇄하기</button></div>'}
+function printCard(){var w=window.open('','_blank');if(!w){toast('팝업이 막혀 있어요. 팝업을 허용해 주세요');return}w.document.write(R.cardDoc(R.cardHTML(S,CFG),true));w.document.close()}
 /* ───────── 내 책장 ───────── */
 function renderShelf(){var sh=R.shelf(S),el=$('#shelfCard');if(!el)return;if(!sh.length){el.style.display='none';return}el.style.display='';
   var sm=R.summary(S,CFG);$('#shelfInfo').textContent='다 읽은 책 '+sh.length+'권 · 지금까지 읽은 쪽 '+sm.pagesAll+'쪽 · 도장판의 숫자는 몇 번째 책인지 알려 줘요';
   $('#shelf').innerHTML=sh.map(function(b,i){var bk=b.book||{},f=b.fin||{},lg=R.arr(b,'logs').map(function(l){return l.date}).sort();
-    return '<div class="sbook"><span class="sno">'+(i+1)+'번째 책</span><b>'+esc(bk.title||'제목 없음')+'</b><span class="hint">'+esc(bk.author||'')+(bk.pages?' · '+esc(bk.pages)+'쪽':'')+'</span>'+
+    return '<div class="sbook"><span class="sno">'+(i+1)+'번째 책</span>'+(bk.cover?'<img class="scov" src="'+bk.cover+'" alt="">':'')+'<b>'+esc(bk.title||'제목 없음')+'</b><span class="hint">'+esc(bk.author||'')+(bk.pages?' · '+esc(bk.pages)+'쪽':'')+'</span>'+
       (lg.length?'<span class="hint">'+md(lg[0])+' ~ '+md(lg[lg.length-1])+' · 기록 '+lg.length+'회</span>':'')+(f.star?'<span class="sstar">'+'★★★★★'.slice(0,+f.star)+'</span>':'')+(f.oneline?'<q>'+esc(f.oneline)+'</q>':'')+
       '<button class="btn ghost sm" data-shelf="'+i+'">📖 기록 보기</button></div>'}).join('')}
 function openShelf(i){var b=R.shelf(S)[i];if(!b)return;
@@ -902,6 +924,8 @@ document.addEventListener('DOMContentLoaded',function(){
   try{var msg=sessionStorage.getItem('r40msg');if(msg){sessionStorage.removeItem('r40msg');setTimeout(function(){toast(msg)},300)}}catch(e){}
   window.addEventListener('hashchange',function(){if(R.cfgFromUrl(location.href))location.reload()});
   $('#quoteNext').addEventListener('click',function(){var b=$('#quoteBox');b.classList.add('fade');setTimeout(function(){qIdx=(qIdx+1)%R.QUOTES.length;renderQuote();b.classList.remove('fade')},220)});
+  $('#coverBox').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];if(!f)return;shrink(f,function(url){set('book.cover',url);renderCover();toast('표지를 넣었어요')},520)});
+  $('#coverBox').addEventListener('click',function(e){if(e.target.closest('#coverDel')&&confirm('표지를 지울까요?')){set('book.cover','');renderCover()}});
   $('#calPrev').addEventListener('click',function(){calYM--;renderCal()});
   $('#calNext').addEventListener('click',function(){calYM++;renderCal()});
   $('#genre').addEventListener('click',function(e){var b=e.target.closest('[data-g]');if(!b)return;set('book.genre',b.dataset.g);applyGenre();renderHome();renderDots()});
@@ -937,8 +961,9 @@ document.addEventListener('DOMContentLoaded',function(){
     if(i>=0){var a=R.actById(b.dataset.act);if(actState(a)&&!confirm('‘'+a.name+'’ 활동을 빼면 화면에서 사라져요. (쓴 내용은 남아 있어 다시 고르면 돌아와요) 뺄까요?'))return;c.splice(i,1)}else c.push(b.dataset.act);
     set('act.chosen',c);renderAct();renderDots();if(i<0){var el=$('#af-'+b.dataset.act);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}});
   var F=$('#actForms');
-  F.addEventListener('input',function(e){var el=e.target;if(!el.dataset.a)return;actSet(el.dataset.a,el.dataset.f,el.value);var a=R.actById(el.dataset.a);if(a.mm)drawMM(a);refreshActState(el.dataset.a)});
+  F.addEventListener('input',function(e){var el=e.target;if(!el.dataset.a)return;actSet(el.dataset.a,el.dataset.f,el.value);var a=R.actById(el.dataset.a);if(a.mm)drawMM(a);if(a.id==='card'){clearTimeout(F._c);F._c=setTimeout(renderCardPrev,250)}refreshActState(el.dataset.a)});
   F.addEventListener('click',function(e){var c=e.target.closest('[data-achip]');if(c){var a=R.actById(c.dataset.achip),v=(aval(a,c.dataset.f)||[]).slice(),i=v.indexOf(c.dataset.o);i>=0?v.splice(i,1):v.push(c.dataset.o);actSet(a.id,c.dataset.f,v);c.classList.toggle('on');refreshActState(a.id);return}
+    if(e.target.closest('#cardPrint')){printCard();return}
     var r=e.target.closest('[data-rmimg]');if(r){e.preventDefault();actSet(r.dataset.rmimg,r.dataset.f,'');renderAct()}});
   F.addEventListener('change',function(e){var el=e.target;if(!el.dataset.aimg||!el.files[0])return;shrink(el.files[0],function(url){actSet(el.dataset.aimg,el.dataset.f,url);renderAct()})});  $('#stars').addEventListener('click',function(e){var s=e.target.closest('[data-star]');if(!s)return;set('fin.star',+s.dataset.star);renderStars();renderCheck();renderDots()});
   $('#rub').addEventListener('change',function(e){var x=e.target;if(x.name&&x.name.indexOf('rb')===0){var s=Object.assign({},get('self')||{});s[x.name.slice(2)]=x.value;set('self',s);renderCheck();renderDots()}});
