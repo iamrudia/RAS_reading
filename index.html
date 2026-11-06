@@ -54,6 +54,7 @@ h3{font-size:18px;margin:0 0 8px}
 .btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:12px;padding:10px 16px;font:inherit;font-weight:500;cursor:pointer;background:var(--ink);color:#fff;text-decoration:none;transition:transform .12s,box-shadow .12s}
 .btn:hover{transform:translateY(-1px);box-shadow:0 6px 14px -8px rgba(31,28,46,.5)}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.heroBtns{flex-direction:column;align-items:flex-start}.btn.glass{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.55)}.btn.glass:hover{background:rgba(255,255,255,.24)}
 .btn.teal{background:var(--teal)} .btn.light{background:#fff;color:var(--teal-d)} .btn.red{background:var(--red)} .btn.sm{padding:6px 11px;font-size:14px}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 label.f{display:block;font-weight:500;font-size:14px;margin:14px 0 4px}
@@ -258,7 +259,7 @@ table.t td.c{text-align:center;white-space:nowrap}
       <span class="eyebrow">📖 BOOK ROAD</span> <span class="pill" id="classPill"></span>
       <h1 id="heroTitle"><span class="heroBrand">북로드</span>책과 함께 걷는<br><em>지혜의 숲길</em></h1>
       <p class="lead">전자도서관에서 내가 읽고 싶은 책 한 권을 골라 끝까지 걸어가요. 읽기 전에 기대하고, 날마다 기록하며 도장을 모으고, 다 읽은 뒤에는 생각을 나누어요.</p>
-      <div class="btns"><a class="btn light" id="elibLink" target="_blank" rel="noopener">📚 경기도교육청 전자도서관 열기 ↗</a></div>
+      <div class="btns heroBtns"><a class="btn light" id="elibLink" target="_blank" rel="noopener">📚 경기도교육청 전자도서관 열기 ↗</a><a class="btn glass" href="paju.html" target="_blank" rel="noopener">📍 파주 책문화 탐방 ↗</a></div>
       <p class="hint">전자책은 한 번 빌리면 대출 기간이 끝나요. 다 읽지 못했다면 <b>연장하거나 다시 빌려요.</b> 전자책은 글자 크기에 따라 쪽수가 바뀌니 <b>같은 기기·같은 글자 크기</b>로 읽고 <b>마지막으로 읽은 쪽</b>을 적어요.</p>
     </div>
     <div class="card">
