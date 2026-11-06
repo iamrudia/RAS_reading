@@ -634,7 +634,7 @@ function renderDuring(){
   if(!$('#lgDate').value)$('#lgDate').value=today();
   var lp=R.lastPage(S),tot=+get('book.pages')||0;if(!$('#lgFrom').value)$('#lgFrom').value=lp+1;
   var hint=$('#lgPgHint');if(!hint){hint=document.createElement('span');hint.id='lgPgHint';$('.pgr').parentNode.appendChild(hint)}
-  hint.textContent=lp?'지난번 '+lp+'쪽까지 → '+(lp+1)+'쪽부터'+(tot?' (전체 '+tot+'쪽)':''):(tot?'전체 '+tot+'쪽':'첫 기록은 1쪽부터');
+  hint.textContent=lp?'지난번 '+lp+'쪽까지 → '+(lp+1)+'쪽부터'+(tot?' (전체 '+tot+'쪽)':''):(tot?'전체 '+tot+'쪽':'');
   var logs=arr('logs').slice().sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:0}),s=startDate();
   $('#logList').innerHTML=logs.length?'<table class="t"><tr><th style="width:110px">날짜</th><th>읽은 쪽 · 장</th><th style="width:60px">%</th><th>한 줄 메모</th><th style="width:44px">기분</th><th style="width:30px"></th></tr>'+logs.map(function(l){var k=diff(s,l.date)+1;
     return '<tr><td class="c">'+md(l.date)+(k>=1&&k<=days()?' <span class="hint">('+k+'일째)</span>':'')+'</td><td>'+esc(R.pageText(l))+'</td><td class="c">'+(filled(l.pct)?esc(l.pct)+'%':'')+'</td><td>'+esc(l.memo)+'</td><td class="c">'+esc(l.mood)+'</td><td class="c"><button class="x" data-del="logs" data-id="'+l.id+'" title="지우기">×</button></td></tr>'}).join('')+'</table>'
