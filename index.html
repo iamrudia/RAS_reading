@@ -574,7 +574,7 @@ table.t td.c{text-align:center;white-space:nowrap}
 <div class="toast" id="toast"></div>
 <div class="stampfx" id="stampFx" aria-live="polite"><img src="stamp.webp" alt="오늘의 독서 완료 도장"><p id="stampTxt"></p></div>
 
-<script src="core.js?v=2.0"></script>
+<script src="core.js?v=2.1"></script>
 <script>
 (function(){
 'use strict';
@@ -878,7 +878,7 @@ var cardCssOn=false;
 function renderCardPrev(){var box=$('#af-card');if(!box)return;var pv=$('#cardPrev');
   if(!cardCssOn){var st=document.createElement('style');st.textContent=R.CARD_CSS.replace(/@page\{[^}]*\}/,'').replace(/body\{[^}]*\}/g,'').replace(/@media screen\{body\{[^}]*\}\}/,'');document.head.appendChild(st);cardCssOn=true}
   if(!pv){pv=document.createElement('div');pv.id='cardPrev';pv.className='cardPrev';box.appendChild(pv)}
-  pv.innerHTML='<p class="hint" style="margin:0 0 10px">🃏 카드 미리보기 (실제 크기 A7, 74×105mm) — 표지는 ‘내 책’에서, 별점은 ⑤에서 넣어요.</p>'+R.cardHTML(S,CFG)+'<div class="btns" style="justify-content:center"><button class="btn teal sm" id="cardPrint">🖨 카드 인쇄하기</button></div>'}
+  pv.innerHTML='<p class="hint" style="margin:0 0 10px">🃏 카드 미리보기 (실제 크기 A7, 74×105mm) — 표지는 ‘내 책’에서, 학번·이름은 ‘나의 정보’에서 넣어요.</p>'+R.cardHTML(S,CFG)+'<div class="btns" style="justify-content:center"><button class="btn teal sm" id="cardPrint">🖨 카드 인쇄하기</button></div>'}
 function printCard(){var w=window.open('','_blank');if(!w){toast('팝업이 막혀 있어요. 팝업을 허용해 주세요');return}w.document.write(R.cardDoc(R.cardHTML(S,CFG),true));w.document.close()}
 /* ───────── 내 책장 ───────── */
 function renderShelf(){var sh=R.shelf(S),el=$('#shelfCard');if(!el)return;if(!sh.length){el.style.display='none';return}el.style.display='';

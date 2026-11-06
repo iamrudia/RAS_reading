@@ -2,7 +2,7 @@
    서버·데이터베이스 없음. 학급 설정은 링크(#c=…) 안에, 학생 기록은 학생 브라우저에만 저장된다. */
 (function(g){
 'use strict';
-var R={VERSION:'2.0',NAME:'북로드',SUB:'책과 함께 걷는 지혜의 숲길'};
+var R={VERSION:'2.1',NAME:'북로드',SUB:'책과 함께 걷는 지혜의 숲길'};
 
 /* 학급 설정 기본값 */
 R.DEF={v:1,id:'',school:'',cls:'',title:'북로드',days:40,start:'',end:'',checks:[10,20,30],
@@ -159,24 +159,25 @@ R.CARD_CSS="@page{size:A4 landscape;margin:0}*{box-sizing:border-box}body{margin
 ".cards{display:grid;grid-template-columns:repeat(4,74mm);grid-auto-rows:104.6mm;justify-content:center;align-content:start}.one .cards{grid-template-columns:74mm;justify-content:start}"+
 ".bc{width:74mm;height:104.6mm;padding:3mm;outline:.25mm dashed #b8b0e0;outline-offset:-.12mm;break-inside:avoid;overflow:hidden;background:#fff}"+
 ".bc .in{height:100%;border:.5mm solid #3b34a8;border-radius:3mm;overflow:hidden;display:flex;flex-direction:column;background:#fffdf9}"+
-".bc .top{display:flex;gap:2.5mm;padding:2.6mm;background:linear-gradient(135deg,#2b2588,#4a41c4);color:#fff}"+
-".bc .cv{width:19mm;height:27mm;flex:none;border-radius:1.2mm;background:#fff center/cover no-repeat;box-shadow:0 .6mm 1.2mm rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;text-align:center;font-size:6pt;color:#3b34a8;padding:1mm;font-weight:700}"+
-".bc .ti{min-width:0;display:flex;flex-direction:column;gap:.6mm}.bc .eb{font-size:4.8pt;letter-spacing:.08em;color:#ffd58a;font-weight:700}"+
-".bc h2{margin:0;font-family:'Noto Serif KR',serif;font-size:10pt;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}.bc .au{font-size:6.2pt;opacity:.88}.bc .st{color:#ffd58a;font-size:7.5pt;letter-spacing:.5px}.bc .gn{font-size:5.6pt;opacity:.8}"+
+".bc .top{display:flex;flex-direction:column;align-items:center;gap:1.6mm;padding:2.6mm 2.6mm 2mm;background:linear-gradient(135deg,#2b2588,#4a41c4);color:#fff}"+
+".bc .cv{width:31mm;height:43mm;flex:none;border-radius:1.2mm;background:#fff center/cover no-repeat;box-shadow:0 .8mm 1.6mm rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Noto Serif KR',serif;font-size:8pt;color:#3b34a8;padding:2mm;font-weight:700}"+
+".bc .sn{font-size:8.5pt;font-weight:700;letter-spacing:.04em;background:rgba(255,255,255,.16);border-radius:9mm;padding:.4mm 3mm}"+
 ".bc .bd{padding:2mm 3mm 1mm;display:flex;flex-direction:column;gap:1.5mm;flex:1;min-height:0}.bc .k{font-size:5.4pt;font-weight:700;color:#3b34a8;letter-spacing:.03em}"+
-".bc .v{font-size:6.8pt;line-height:1.4;margin-top:.3mm;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}.bc .q .v{font-family:'Noto Serif KR',serif;font-size:7.2pt;-webkit-line-clamp:2}"+
+".bc .v{font-size:6.8pt;line-height:1.4;margin-top:.3mm;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}.bc .w .v{-webkit-line-clamp:1}.bc .q .v{font-family:'Noto Serif KR',serif;font-size:7.2pt;-webkit-line-clamp:2}"+
 ".bc .kw{display:flex;gap:1mm;flex-wrap:wrap}.bc .kw span{background:#ebe9fa;color:#2b2588;border-radius:9mm;padding:.2mm 1.6mm;font-size:5.8pt;font-weight:700}"+
 ".bc .ft{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:1mm;border-top:.25mm dashed #cfc8ef;padding:1.2mm 3mm 1.5mm;font-size:5.4pt;color:#6a6578}.bc .like{border:.3mm dashed #c27c1a;color:#c27c1a;border-radius:1mm;padding:.3mm 1.4mm;font-weight:700;white-space:nowrap}"+
 ".blank{color:#b0aac0}.tip{font-size:13px;color:#2b2588;background:#ebe9fa;border-radius:8px;padding:8px 12px;margin:0 auto 6mm;max-width:296mm}@media print{.tip{display:none}}@media screen{body{background:#f6f3ec;padding:6mm}}";
 R.cardHTML=function(S,c){var B=R.cardBook(S),e=R.esc,b=B.book||{},p=B.profile||{},d=g_(B,'act.data.card')||{},g=R.genre(B),star=+(g_(B,'fin.star')||0);
   var q=d.q||g_(B,'post.share')||'',kw=String(d.key||'').split(/[,，·\s]+/).filter(Boolean).slice(0,4);
   function blk(cls,k,v){return '<div class="'+cls+'"><div class="k">'+k+'</div><div class="v">'+(R.filled(v)?e(v).replace(/\n/g,'<br>'):'<span class="blank">(아직 쓰지 않았어요)</span>')+'</div></div>'}
-  return '<div class="bc"><div class="in"><div class="top"><div class="cv"'+(b.cover?' style="background-image:url('+b.cover+')"':'')+'>'+(b.cover?'':e(b.title||'표지'))+'</div>'+
-   '<div class="ti"><span class="eb">📚 BOOK ROAD · 30초 책 소개</span><h2>'+e(b.title||'제목 없음')+'</h2><span class="au">'+e(b.author||'')+(b.pub?' · '+e(b.pub):'')+'</span>'+
-   (star?'<span class="st">'+'★★★★★'.slice(0,star)+'<span style="opacity:.35">'+'★★★★★'.slice(0,5-star)+'</span></span>':'')+'<span class="gn">'+(g==='fic'?'소설·이야기':g==='non'?'비문학':'')+(b.pages?' · '+e(b.pages)+'쪽':'')+'</span></div></div>'+
+  var sid=R.studentNo(p),who=[sid,p.name].filter(Boolean).join(' ');
+  return '<div class="bc"><div class="in"><div class="top"><div class="cv"'+(b.cover?' style="background-image:url('+b.cover+')"':'')+'>'+(b.cover?'':'<span>'+e(b.title||'표지를 올려 주세요')+'</span>')+'</div>'+
+   '<div class="sn">'+(who?e(who):'학번 · 이름')+'</div></div>'+
    '<div class="bd">'+blk('s','한 문장으로 말하면',d.sum)+blk('w','이런 친구에게 추천해요',d.who)+blk('q','함께 나눌 질문',q?'Q. '+q:'')+
    (kw.length?'<div><div class="k">이 책을 세 단어로</div><div class="kw" style="margin-top:1mm">'+kw.map(function(w){return '<span>#'+e(w)+'</span>'}).join('')+'</div></div>':'')+'</div>'+
-   '<div class="ft"><span>추천한 사람: '+e([R.gradeLabel(p.grade),p.cls&&p.cls+'반',p.name].filter(Boolean).join(' ')||'')+'</span><span class="like">읽고 싶어요 ☐</span></div></div></div>'};
+   '<div class="ft"><span>📚 북로드 · 30초 책 소개</span><span class="like">읽고 싶어요 ☐</span></div></div></div>'};
+/* 학번: 학년 1자리 + 반 2자리 + 번호 2자리 (예: 2학년 3반 15번 → 20315). 고등학생은 학년 값 4~6 → 1~3 */
+R.studentNo=function(p){p=p||{};var g=+p.grade||0,c=+p.cls||0,n=+p.num||0;if(!g||!c||!n)return [R.gradeLabel(g),c?c+'반':'',n?n+'번':''].filter(Boolean).join(' ');return String(g>3?g-3:g)+('0'+c).slice(-2)+('0'+n).slice(-2)};
 R.cardDoc=function(inner,one){return '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>북로드 책 소개 카드</title><style>'+R.CARD_CSS+'</style></head><body class="'+(one?'one':'')+'"><div class="tip">🖨 인쇄 설정: 용지 <b>A4 · 가로</b> · 여백 <b>없음</b> · 배율 <b>100%(실제 크기)</b> · <b>배경 그래픽</b> 켜기 → 카드 한 장이 A7(74×105mm)로 나와요. 점선을 따라 자르세요.</div><div class="cards">'+inner+'</div><script>window.onload=function(){setTimeout(function(){window.print()},400)}<\/script></body></html>'};
 
 /* 책 명언 50 — 순서를 섞어 날마다 하나씩 (같은 날에는 누구에게나 같은 명언) */
