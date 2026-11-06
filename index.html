@@ -156,7 +156,9 @@ body.g-fic [data-genre=non], body.g-non [data-genre=fic]{display:none!important}
 .cal .d.future{opacity:.55}
 .cal .d.cp::after{content:'📌';position:absolute;top:-8px;right:-5px;font-size:16px;z-index:2}
 
-.logform{display:grid;grid-template-columns:170px 1fr 110px 1.6fr 90px auto;gap:8px;align-items:end}
+.logform{display:grid;grid-template-columns:170px 220px 1fr 1.4fr 90px auto;gap:8px;align-items:end}
+.pgr{display:flex;align-items:center;gap:4px}.pgr input{min-width:0;text-align:center}
+#lgPgHint{display:block;font-size:12px;color:var(--teal);margin-top:2px}
 @media (max-width:820px){.logform{grid-template-columns:1fr 1fr}}
 .logform label{font-size:13px;font-weight:500}
 table.t{width:100%;border-collapse:collapse;font-size:14px}
@@ -245,7 +247,7 @@ table.t td.c{text-align:center;white-space:nowrap}
       <h1 id="heroTitle"><span class="heroBrand">북로드</span>책과 함께 걷는<br><em>지혜의 숲길</em></h1>
       <p class="lead">전자도서관에서 내가 읽고 싶은 책 한 권을 골라 끝까지 걸어가요. 읽기 전에 기대하고, 날마다 기록하며 도장을 모으고, 다 읽은 뒤에는 생각을 나누어요.</p>
       <div class="btns"><a class="btn light" id="elibLink" target="_blank" rel="noopener">📚 경기도교육청 전자도서관 열기 ↗</a></div>
-      <p class="hint">전자책은 한 번 빌리면 대출 기간이 끝나요. 다 읽지 못했다면 <b>연장하거나 다시 빌려요.</b> 전자책은 쪽수가 기기마다 다르니 위치는 <b>‘장 제목’이나 ‘%’</b>로 적어요.</p>
+      <p class="hint">전자책은 한 번 빌리면 대출 기간이 끝나요. 다 읽지 못했다면 <b>연장하거나 다시 빌려요.</b> 전자책은 글자 크기에 따라 쪽수가 바뀌니 <b>같은 기기·같은 글자 크기</b>로 읽고 <b>마지막으로 읽은 쪽</b>을 적어요.</p>
     </div>
     <div class="card">
       <h3>나의 독서 현황</h3>
@@ -284,6 +286,7 @@ table.t td.c{text-align:center;white-space:nowrap}
       <div class="grid2" style="gap:10px">
         <div><label class="f">지은이</label><input type="text" data-k="book.author"></div>
         <div><label class="f">출판사</label><input type="text" data-k="book.pub"></div>
+        <div><label class="f">전체 쪽수</label><input type="number" min="1" data-k="book.pages" placeholder="예: 260"><span class="hint">읽은 정도(%)를 계산할 때 써요</span></div>
       </div>
       <label class="f">책의 갈래</label>
       <div class="genre" id="genre">
@@ -343,8 +346,8 @@ table.t td.c{text-align:center;white-space:nowrap}
     <h3>📅 독서 일지</h3>
     <div class="logform">
       <div><label>날짜 (숫자 8자리)</label><input type="text" class="dt" id="lgDate"></div>
-      <div><label>어디까지 읽었나 (장 제목 등)</label><input type="text" id="lgPos" placeholder="예: 3장 ‘비 오는 밤’까지"></div>
-      <div><label>전체의 몇 %</label><input type="number" id="lgPct" min="0" max="100" placeholder="0~100"></div>
+      <div><label>읽은 쪽 (시작 ~ 마지막 쪽)</label><div class="pgr"><input type="number" id="lgFrom" min="1" placeholder="시작">~<input type="number" id="lgTo" min="1" placeholder="마지막"></div></div>
+      <div><label>장 제목 (선택)</label><input type="text" id="lgPos" placeholder="예: 3장 ‘비 오는 밤’"></div>
       <div><label>한 줄 메모</label><input type="text" id="lgMemo" placeholder="오늘 읽은 부분에서 기억나는 것"></div>
       <div><label>기분</label><select id="lgMood"><option>😀</option><option selected>🙂</option><option>😐</option><option>😮</option><option>😢</option><option>😴</option></select></div>
       <div><button class="btn teal" id="lgAdd">+ 기록</button></div>
@@ -491,7 +494,7 @@ table.t td.c{text-align:center;white-space:nowrap}
 <div class="toast" id="toast"></div>
 <div class="stampfx" id="stampFx" aria-live="polite"><img src="stamp.webp" alt="오늘의 독서 완료 도장"><p id="stampTxt"></p></div>
 
-<script src="core.js?v=1.4"></script>
+<script src="core.js?v=1.5"></script>
 <script>
 (function(){
 'use strict';
@@ -546,7 +549,7 @@ function dateRule(k,iso){if(!iso)return '';
   if(k==='book.start'&&iso<today()&&iso!==get('book.start'))return '시작일은 오늘('+md(today())+')부터 고를 수 있어요';
   if(k==='book.end'&&iso<startDate())return '끝나는 날은 시작일('+md(startDate())+') 이후로 골라요';
   return ''}
-function after(k){if(k==='profile.grade')applyGrade();if(k==='book.start'||k==='book.end'){calYM=null;renderHeader();renderHome()}renderDots()}
+function after(k){if(k==='book.pages'){renderHome();renderDuring()}if(k==='profile.grade')applyGrade();if(k==='book.start'||k==='book.end'){calYM=null;renderHeader();renderHome()}renderDots()}
 
 /* ───────── 진행 상태 ───────── */
 function st(p){return R.st[p](S,CFG)}
@@ -629,9 +632,12 @@ function renderWhy(){var on=arr('pre.chips');$('#whyChips').innerHTML=R.WHY.map(
 /* ───────── 읽는 중 ───────── */
 function renderDuring(){
   if(!$('#lgDate').value)$('#lgDate').value=today();
+  var lp=R.lastPage(S),tot=+get('book.pages')||0;if(!$('#lgFrom').value)$('#lgFrom').value=lp+1;
+  var hint=$('#lgPgHint');if(!hint){hint=document.createElement('span');hint.id='lgPgHint';$('.pgr').parentNode.appendChild(hint)}
+  hint.textContent=lp?'지난번 '+lp+'쪽까지 → '+(lp+1)+'쪽부터'+(tot?' (전체 '+tot+'쪽)':''):(tot?'전체 '+tot+'쪽':'첫 기록은 1쪽부터');
   var logs=arr('logs').slice().sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:0}),s=startDate();
-  $('#logList').innerHTML=logs.length?'<table class="t"><tr><th style="width:110px">날짜</th><th>어디까지</th><th style="width:60px">%</th><th>한 줄 메모</th><th style="width:44px">기분</th><th style="width:30px"></th></tr>'+logs.map(function(l){var k=diff(s,l.date)+1;
-    return '<tr><td class="c">'+md(l.date)+(k>=1&&k<=days()?' <span class="hint">('+k+'일째)</span>':'')+'</td><td>'+esc(l.pos)+'</td><td class="c">'+(filled(l.pct)?esc(l.pct)+'%':'')+'</td><td>'+esc(l.memo)+'</td><td class="c">'+esc(l.mood)+'</td><td class="c"><button class="x" data-del="logs" data-id="'+l.id+'" title="지우기">×</button></td></tr>'}).join('')+'</table>'
+  $('#logList').innerHTML=logs.length?'<table class="t"><tr><th style="width:110px">날짜</th><th>읽은 쪽 · 장</th><th style="width:60px">%</th><th>한 줄 메모</th><th style="width:44px">기분</th><th style="width:30px"></th></tr>'+logs.map(function(l){var k=diff(s,l.date)+1;
+    return '<tr><td class="c">'+md(l.date)+(k>=1&&k<=days()?' <span class="hint">('+k+'일째)</span>':'')+'</td><td>'+esc(R.pageText(l))+'</td><td class="c">'+(filled(l.pct)?esc(l.pct)+'%':'')+'</td><td>'+esc(l.memo)+'</td><td class="c">'+esc(l.mood)+'</td><td class="c"><button class="x" data-del="logs" data-id="'+l.id+'" title="지우기">×</button></td></tr>'}).join('')+'</table>'
     :'<div class="empty">아직 기록이 없어요. 오늘 읽은 만큼 첫 기록을 남겨 보세요!</div>';
   var q=arr('quotes');
   $('#qtList').innerHTML=q.length?q.map(function(x){return '<div class="qcard"><button class="x" data-del="quotes" data-id="'+x.id+'">×</button><q>'+br(x.text)+'</q>'+(x.pos?' <span class="hint">('+esc(x.pos)+')</span>':'')+(x.think?'<div class="hint" style="margin-top:4px">→ '+br(x.think)+'</div>':'')+'</div>'}).join(''):'<div class="empty" style="margin-top:10px">마음에 남는 문장을 만나면 담아 두세요.</div>';
@@ -644,7 +650,7 @@ function stamp(d){var k=diff(startDate(),d)+1,fx=$('#stampFx');
   $('#stampTxt').textContent=md(d)+(k>=1&&k<=days()?' · '+k+'일째':'')+' 독서 완료! 도장 '+R.summary(S,CFG).logDays+'개';
   fx.classList.remove('on');void fx.offsetWidth;fx.classList.add('on');
   clearTimeout(fx._h);fx._h=setTimeout(function(){fx.classList.remove('on')},1900)}
-function delItem(key,id){if(!confirm('이 기록을 지울까요?'))return;set(key,arr(key).filter(function(x){return x.id!==id}));renderDuring();renderDots()}
+function delItem(key,id){if(!confirm('이 기록을 지울까요?'))return;set(key,arr(key).filter(function(x){return x.id!==id}));if(key==='logs')$('#lgFrom').value='';renderDuring();renderDots()}
 
 /* ───────── 읽은 후 ───────── */
 function renderPicks(){
@@ -753,7 +759,7 @@ function sheetHTML(){var p=get('profile')||{},b=get('book')||{},pre=get('pre')||
    '<tr><th>갈래</th><td>'+(g==='fic'?'소설·이야기':g==='non'?'비문학':'')+'</td><th>독서 기간</th><td>'+R.fmtD(s)+' ~ '+R.fmtD(endDate())+' ('+days()+'일)</td></tr>'+
    '<tr><th>별점</th><td>'+(fn.star?'★★★★★'.slice(0,+fn.star)+'☆☆☆☆☆'.slice(0,5-fn.star):'')+'</td><th>한 줄 평</th><td>'+esc(fn.oneline||'')+'</td></tr></table>'+
    '<h3>① 읽기 전</h3>'+qa('고른 이유',arr('pre.chips').join(', ')+(pre.why?'\n'+pre.why:''))+qa('내용 예상',pre.predict)+qa('궁금한 점',pre.wonder)+qa('읽기 계획',[pre.size&&'분량: '+pre.size,pre.daily&&'하루 목표: '+pre.daily,pre.when&&'독서 약속: '+pre.when].filter(Boolean).join('\n'))+
-   '<h3>② 읽는 중</h3><h4>독서 일지 ('+logs.length+'회)</h4>'+(logs.length?'<table class="t"><tr><th style="width:80px">날짜</th><th>어디까지</th><th style="width:50px">%</th><th>한 줄 메모</th><th style="width:40px"></th></tr>'+logs.map(function(l){return '<tr><td class="c">'+md(l.date)+'</td><td>'+esc(l.pos)+'</td><td class="c">'+(filled(l.pct)?esc(l.pct):'')+'</td><td>'+esc(l.memo)+'</td><td class="c">'+esc(l.mood)+'</td></tr>'}).join('')+'</table>':'<span class="blank">(기록 없음)</span>')+
+   '<h3>② 읽는 중</h3><h4>독서 일지 ('+logs.length+'회)</h4>'+(logs.length?'<table class="t"><tr><th style="width:80px">날짜</th><th>읽은 쪽 · 장</th><th style="width:50px">%</th><th>한 줄 메모</th><th style="width:40px"></th></tr>'+logs.map(function(l){return '<tr><td class="c">'+md(l.date)+'</td><td>'+esc(R.pageText(l))+'</td><td class="c">'+(filled(l.pct)?esc(l.pct):'')+'</td><td>'+esc(l.memo)+'</td><td class="c">'+esc(l.mood)+'</td></tr>'}).join('')+'</table>':'<span class="blank">(기록 없음)</span>')+
    '<h4>구절 모음</h4>'+(arr('quotes').length?arr('quotes').map(function(x){return '<div class="qcard"><q>'+br(x.text)+'</q>'+(x.pos?' <span class="hint">('+esc(x.pos)+')</span>':'')+(x.think?'<div class="hint">→ '+br(x.think)+'</div>':'')+'</div>'}).join(''):'<span class="blank">(없음)</span>')+
    '<h4>질문 메모</h4>'+(arr('qs').length?'<ol>'+arr('qs').map(function(x){return '<li>'+esc(x.text)+'</li>'}).join('')+'</ol>':'<span class="blank">(없음)</span>')+
    '<h3>③ 읽은 후</h3>'+(g==='non'?qa('주제',po.theme)+qa('중요한 내용 ①',po.key1)+qa('중요한 내용 ②',po.key2)+qa('중요한 내용 ③',po.key3):qa('줄거리',po.summary))+
@@ -789,18 +795,23 @@ document.addEventListener('DOMContentLoaded',function(){
   $('#calNext').addEventListener('click',function(){calYM++;renderCal()});
   $('#genre').addEventListener('click',function(e){var b=e.target.closest('[data-g]');if(!b)return;set('book.genre',b.dataset.g);applyGenre();renderHome();renderDots()});
   $('#whyChips').addEventListener('click',function(e){var b=e.target.closest('[data-w]');if(!b)return;var a=arr('pre.chips').slice(),i=a.indexOf(b.dataset.w);i>=0?a.splice(i,1):a.push(b.dataset.w);set('pre.chips',a);renderWhy();renderDots()});
-  $('#lgAdd').addEventListener('click',function(){var raw=$('#lgDate').value.trim(),d=raw?R.parseDate(raw):today(),pct=$('#lgPct').value;
+  $('#lgAdd').addEventListener('click',function(){var raw=$('#lgDate').value.trim(),d=raw?R.parseDate(raw):today();
     if(!d){toast('날짜를 숫자 8자리로 써 주세요 (예: '+R.digits8(today())+')');$('#lgDate').focus();return}
     if(d>today()){toast('아직 오지 않은 날짜예요. 날짜를 확인해 주세요');return}
     if(!get('book.start')&&!CFG.start){if(d<today()){toast('첫 기록은 오늘 날짜로 시작해요');$('#lgDate').value=today();return}
       set('book.start',today());var sf=$('[data-k="book.start"]');if(sf)sf.value=today();calYM=null}
     if(d<startDate()){toast('시작일('+md(startDate())+') 이전 날짜에는 기록할 수 없어요');return}
     if(d>endDate()){toast('독서 기간('+R.fmtD(endDate())+'까지)이 끝났어요. 기간을 늘리려면 ① 읽기 전에서 끝나는 날을 바꿔요');return}
-    if(!$('#lgPos').value.trim()&&!$('#lgMemo').value.trim()&&!pct){toast('어디까지 읽었는지나 한 줄 메모를 적어 주세요');return}
-    if(pct!=='')pct=Math.max(0,Math.min(100,Math.round(+pct)));
+    var from=Math.round(+$('#lgFrom').value||0),to=Math.round(+$('#lgTo').value||0),tot=+get('book.pages')||0,pct='';
+    if(!to){toast('마지막으로 읽은 쪽을 적어 주세요');$('#lgTo').focus();return}
+    if(!from)from=R.lastPage(S)+1;
+    if(to<from){toast('마지막 쪽은 시작 쪽('+from+'쪽)보다 커야 해요');$('#lgTo').focus();return}
+    if(tot&&to>tot){toast('전체 쪽수('+tot+'쪽)보다 커요. 쪽수를 확인해 주세요');return}
+    if(tot)pct=Math.min(100,Math.round(to/tot*100));
     var first=!arr('logs').some(function(l){return l.date===d});
-    addItem('logs',{date:d,pos:$('#lgPos').value.trim(),pct:pct,memo:$('#lgMemo').value.trim(),mood:$('#lgMood').value});
-    $('#lgPos').value='';$('#lgPct').value='';$('#lgMemo').value='';
+    addItem('logs',{date:d,from:from,to:to,pos:$('#lgPos').value.trim(),pct:pct,memo:$('#lgMemo').value.trim(),mood:$('#lgMood').value});
+    $('#lgPos').value='';$('#lgTo').value='';$('#lgMemo').value='';$('#lgFrom').value=R.lastPage(S)+1;renderDuring();
+    if(tot&&to>=tot)setTimeout(function(){toast('🎉 끝까지 다 읽었어요! ③ 읽은 후로 가 볼까요?')},2100);
     if(first)stamp(d);else toast(md(d)+' 기록을 더했어요. 도장은 하루에 하나예요');renderBanners()});
   $('#qtAdd').addEventListener('click',function(){var t=$('#qtText').value.trim();if(!t){toast('문장을 먼저 적어 주세요');return}
     addItem('quotes',{text:t,pos:$('#qtPos').value.trim(),think:$('#qtThink').value.trim()});$('#qtText').value='';$('#qtPos').value='';$('#qtThink').value='';toast('구절을 담았어요')});

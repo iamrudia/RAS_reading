@@ -2,7 +2,7 @@
    서버·데이터베이스 없음. 학급 설정은 링크(#c=…) 안에, 학생 기록은 학생 브라우저에만 저장된다. */
 (function(g){
 'use strict';
-var R={VERSION:'1.4',NAME:'북로드',SUB:'책과 함께 걷는 지혜의 숲길'};
+var R={VERSION:'1.5',NAME:'북로드',SUB:'책과 함께 걷는 지혜의 숲길'};
 
 /* 학급 설정 기본값 */
 R.DEF={v:1,id:'',school:'',cls:'',title:'북로드',days:40,start:'',end:'',checks:[10,20,30],
@@ -100,6 +100,9 @@ function arr(S,p){var a=g_(S,p);return Array.isArray(a)?a:[]}
 R.get=g_;R.arr=arr;
 R.genre=function(S){return g_(S,'book.genre')||''};
 R.startDate=function(S,c){var s=g_(S,'book.start');if(s)return s;if(c.start)return c.start;var l=arr(S,'logs').map(function(x){return x.date}).sort();return l[0]||R.today()};
+/* 쪽수: 지금까지 읽은 마지막 쪽 */
+R.lastPage=function(S){return Math.max.apply(null,[0].concat(arr(S,'logs').map(function(l){return +l.to||0})))};
+R.pageText=function(l){return (+l.to?(+l.from&&+l.from!==+l.to?l.from+'~':'')+l.to+'쪽':'')+(l.pos?(+l.to?' · ':'')+l.pos:'')};
 R.days=function(c){return Math.max(1,+c.days||40)};
 /* 기간: 시작일 ~ 끝나는 날(학생 > 선생님 > 시작일+기본 일수) */
 R.endDate=function(S,c){var s=R.startDate(S,c),e=g_(S,'book.end')||c.end;if(!e||e<s)e=R.addD(s,R.days(c)-1);return e};
@@ -129,7 +132,8 @@ R.st={
 };
 R.summary=function(S,c){var logs=arr(S,'logs'),s=R.startDate(S,c),D=R.span(S,c),dates={};
   logs.forEach(function(l){var k=R.diff(s,l.date);if(k>=0&&k<D)dates[l.date]=1});
-  var pct=Math.min(100,Math.max.apply(null,[0].concat(logs.map(function(l){return +l.pct||0}))));
+  var tot=+g_(S,'book.pages')||0;
+  var pct=Math.min(100,Math.max.apply(null,[0].concat(logs.map(function(l){return (tot&&+l.to)?Math.round(+l.to/tot*100):(+l.pct||0)}))));
   var ch=R.actChosen(S,c);
   return {start:s,end:R.endDate(S,c),span:D,logs:logs.length,logDays:Object.keys(dates).length,pct:pct,quotes:arr(S,'quotes').length,qs:arr(S,'qs').length,
     actDone:ch.filter(function(a){return R.actState(S,a)===2}).length,actNeed:R.actNeed(S,c),actNames:ch.map(function(a){return a.name}),
