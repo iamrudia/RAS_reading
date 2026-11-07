@@ -549,7 +549,7 @@ table.t td.c{text-align:center;white-space:nowrap}
     <div class="card">
       <h3>🌳 성찰 문장 완성하기</h3>
       <p class="hint" style="margin-top:-4px">빈칸을 채워 문장을 완성해요. 3차시 모둠 e-book의 내 쪽에 들어가요.</p>
-      <label class="f">혼자 걸은 독서의 길은 <u>&nbsp; ① &nbsp;</u> 할 때 함께 걷는 길이 된다.</label>
+      <label class="f">내가 고른 책 한 권은 <u>&nbsp; ① &nbsp;</u> 할 때 우리 모두의 이야기가 된다.</label>
       <input type="text" data-k="fin.r1" placeholder="① 예: 친구의 질문을 듣고 내 생각을 다시 볼">
       <label class="f">이 책은 나에게 <u>&nbsp; ② &nbsp;</u> 이다. 왜냐하면 <u>&nbsp; ③ &nbsp;</u>.</label>
       <div class="grid2" style="gap:10px"><input type="text" data-k="fin.r2" placeholder="② 예: 거울"><input type="text" data-k="fin.r3" placeholder="③ 예: 내가 숨기던 마음을 비춰 주었기 때문이다"></div>
@@ -847,7 +847,7 @@ function renderCheck(){var p=get('profile')||{},b=get('book')||{},sm=R.summary(S
   if(sm.done>1||R.shelf(S).length)items.push(['📚 내 책장 (완독 '+sm.done+'권 · '+sm.pagesAll+'쪽)',2,'home']);
   $('#check').innerHTML=items.map(function(it){return '<div><span class="'+(it[1]===2?'ok':it[1]?'mid':'no')+'">'+(it[1]===2?'✔':it[1]?'●':'✗')+'</span> <a href="#" data-go="'+it[2]+'">'+it[0]+'</a></div>'}).join('')}
 function renderRefl(){var f=get('fin')||{},g=get('group')||{},B=function(v,n){return filled(v)?'<b>'+esc(v)+'</b>':'<b style="opacity:.45">'+n+'</b>'};
-  $('#reflPrev').innerHTML='혼자 걸은 독서의 길은 '+B(f.r1,'①')+' 할 때 함께 걷는 길이 된다.<br>이 책은 나에게 '+B(f.r2,'②')+' 이다. 왜냐하면 '+B(f.r3,'③')+'.';
+  $('#reflPrev').innerHTML='내가 고른 책 한 권은 '+B(f.r1,'①')+' 할 때 우리 모두의 이야기가 된다.<br>이 책은 나에게 '+B(f.r2,'②')+' 이다. 왜냐하면 '+B(f.r3,'③')+'.';
   var ok=R.okUrl(g.link);$('#groupOpen').innerHTML=ok?'<a class="btn teal sm" href="'+esc(g.link)+'" target="_blank" rel="noopener">📘 우리 모둠 e-book 열기 ↗</a>':(filled(g.link)?'<span class="hint" style="color:var(--red)">링크는 https:// 로 시작해야 해요</span>':'')}
 function renderFin(){renderStars();renderRub();renderCheck();renderRefl();renderSheet();applyUpload()}
 
@@ -895,7 +895,7 @@ function bookPart(archived){var b=get('book')||{},pre=get('pre')||{},po=get('pos
    qa('읽은 후 느낌',po.feel)+qa('감명 깊은 부분',po.best)+qa('그 까닭',po.bestWhy)+qa('함께 나눌 질문',po.share)+qa('그 질문에 대한 내 생각',po.shareMine)+
    ((filled(po.deep1)||filled(po.deep2))?qa('작가의 관점 평가',po.deep1)+qa('다른 것과 견주기',po.deep2):'')+
    '<h3>④ 독후활동</h3>'+(actChosen().length?actChosen().map(actSheet).join(''):'<span class="blank">'+(rep?'(대표 책 「'+esc(R.get(rep,'book.title')||'')+'」에서 완성)':'(고른 활동 없음)')+'</span>')+
-   '<h3>⑤ 마무리</h3>'+qa('독서 소감',fn.reflect)+qa('다음에 읽고 싶은 책',fn.next)+qa('성찰 문장 ①',filled(fn.r1)?'혼자 걸은 독서의 길은 '+fn.r1+' 할 때 함께 걷는 길이 된다.':'')+qa('성찰 문장 ②',(filled(fn.r2)||filled(fn.r3))?'이 책은 나에게 '+(fn.r2||'___')+' 이다. 왜냐하면 '+(fn.r3||'___')+'.':'')+
+   '<h3>⑤ 마무리</h3>'+qa('독서 소감',fn.reflect)+qa('다음에 읽고 싶은 책',fn.next)+qa('성찰 문장 ①',filled(fn.r1)?'내가 고른 책 한 권은 '+fn.r1+' 할 때 우리 모두의 이야기가 된다.':'')+qa('성찰 문장 ②',(filled(fn.r2)||filled(fn.r3))?'이 책은 나에게 '+(fn.r2||'___')+' 이다. 왜냐하면 '+(fn.r3||'___')+'.':'')+
    '<table class="t" style="margin-top:8px"><tr><th style="width:120px">자기평가</th><th>나의 판단</th></tr>'+RUB.map(function(r,i){return '<tr><td>'+r[0]+'</td><td>'+(sv[i]?['','잘함','보통','노력 필요'][sv[i]]+' – '+r[sv[i]]:'<span class="blank">(미선택)</span>')+'</td></tr>'}).join('')+'</table>';
   return h}
 /* ───────── 표지 ───────── */
